@@ -1,6 +1,11 @@
+import java.util.Random;
+
 public class Animal {
+    private static final Random random = new Random();
+
     private String name;
     private Species species;
+    private String colour;
     private int numberOfLegs;
     private boolean hasTail;
     // The getter for this is this.speak()
@@ -18,6 +23,7 @@ public class Animal {
     public Animal(
         String name,
         Species species,
+        String colour,
         int numberOfLegs,
         boolean hasTail
     ) {
@@ -25,6 +31,7 @@ public class Animal {
         // between the two similarly named variables.
         this.name = name;
         this.species = species;
+        this.colour = colour;
         this.numberOfLegs = numberOfLegs;
         this.hasTail = hasTail;
     }
@@ -50,8 +57,9 @@ public class Animal {
         Animal child = new Animal(
             this.name + otherParent.getName(),
             this.species,
+            chooseBetween(this.colour, otherParent.getColour()),
             (this.numberOfLegs + otherParent.getNumberOfLegs()) / 2,
-            this.hasTail || otherParent.getTailBoolean()
+            chooseBetween(this.hasTail, otherParent.getTailBoolean())
         );
 
         child.setUniqueSound(
@@ -63,9 +71,12 @@ public class Animal {
 
     @Override
     public String toString() {
-        return capitalizeFirstLetter(name) +
-            " Info's \nSpecies : " +
+        return "Name : " +
+            capitalizeFirstLetter(name) +
+            "\nSpecies : " +
             species.name() +
+            "\nColour : " +
+            colour +
             "\nNumber of legs : " +
             numberOfLegs +
             "\nHas a tail : " +
@@ -74,47 +85,30 @@ public class Animal {
 
 
     // Setters
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSpecies(Species species) {
-        this.species = species;
-    }
-
-    public void setNumberOfLegs(int numberOfLegs) {
-        this.numberOfLegs = numberOfLegs;
-    }
-
-    public void setTailBoolean(boolean hasTail) {
-        this.hasTail = hasTail;
-    }
-
-    public void setUniqueSound(String sound) {
-        this.uniqueSound = sound;
-    }
+    // Instead of throwing an exception, using math.abs prevents
+    // the setting of numberOfLegs to a negative number
+    public void setNumberOfLegs(int numberOfLegs) { this.numberOfLegs = Math.abs(numberOfLegs); }
+    public void setTailBoolean(boolean hasTail) { this.hasTail = hasTail; }
+    public void setUniqueSound(String sound) { this.uniqueSound = sound; }
+    public void setSpecies(Species species) { this.species = species; }
+    public void setColour(String colour) { this.colour = colour; }
+    public void setName(String name) { this.name = name; }
 
 
     // Getters
-    public String getName() {
-        return name;
-    }
-
-    public Species getSpecies() {
-        return species;
-    }
-
-    public int getNumberOfLegs() {
-        return numberOfLegs;
-    }
-
-    public boolean getTailBoolean() {
-        return hasTail;
-    }
+    public int getNumberOfLegs() { return numberOfLegs; }
+    public boolean getTailBoolean() { return hasTail; }
+    public Species getSpecies() { return species; }
+    public String getColour() { return colour; }
+    public String getName() {return name; }
 
 
     // Private helper function(s)
     private static String capitalizeFirstLetter(String input) {
         return input.substring(0, 1).toUpperCase() + input.substring(1);
+    }
+
+    private static <T> T chooseBetween(T a, T b) {
+        return random.nextBoolean() ? a : b;
     }
 }
