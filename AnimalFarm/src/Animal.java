@@ -3,6 +3,7 @@ import java.util.Random;
 public class Animal {
     private static final Random random = new Random();
 
+    // Access-modifier | type | name
     private String name;
     private Species species;
     private String colour;
@@ -32,7 +33,7 @@ public class Animal {
         this.name = name;
         this.species = species;
         this.colour = colour;
-        this.numberOfLegs = numberOfLegs;
+        this.numberOfLegs = Math.abs(numberOfLegs); // Prevents negative legs
         this.hasTail = hasTail;
     }
 
