@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -15,6 +13,15 @@ public class Main {
             );
 
             System.out.println(input);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Writing the file output
+        try (FileWriter fileWriter = new FileWriter("checksum.txt")) {
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
