@@ -2,26 +2,41 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] args) {
-        // Try with resource (file-reader)
-        // Reading the Input file
-        try (FileReader fileReader = new FileReader("painting.txt")) {
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String input = String.join("\n",
-                bufferedReader
-                    .lines()
-                    .toArray(String[]::new)
-            );
+        // Read File First
+        String[] lines;
 
-            System.out.println(input);
+        // Try with resource is different from a normal try-catch because
+        // it ensures that the resource (FileReader) is closed no matter the outcome
+        try (FileReader fileReader = new FileReader("source.dat")) {
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            lines = bufferedReader.lines().toArray(String[]::new);
+            bufferedReader.close();
+
+        } catch (FileNotFoundException e) {
+            // Exit code was not really specified
+            // Exit code 0 usually signifies success
+            // and exit code > 0 is failure
+            System.exit(0);
+            return;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        // Writing the file output
-        try (FileWriter fileWriter = new FileWriter("checksum.txt")) {
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        // Write file output using Try-With-Resource statement
+        try (FileWriter fileWriter = new FileWriter("redacted.dat")) {
+            PrintWriter printWriter = new PrintWriter(fileWriter);
 
-            
+            for (String line : lines) {
+                String output = line;
+
+                if (line.contains("secret")) continue;
+                if (line.contains("James Bond"))
+                    output = line.replace("James Bond", "*".repeat(10));
+
+                printWriter.println(output);
+            }
+
+            printWriter.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
