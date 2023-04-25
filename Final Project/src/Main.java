@@ -1,5 +1,6 @@
 public class Main {
     public static void main(String[] args) {
-        Tetris game = new Tetris();
+        Tetris tetris = new Tetris(System.in, System.out);
+        tetris.start();
     }
 }
