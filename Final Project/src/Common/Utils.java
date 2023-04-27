@@ -2,15 +2,17 @@ package Common;
 
 // A misc class for misc tools
 public class Utils {
-    public static int getMaxLength(Object<Measurable>[] array) {
+    public static <T> int getMaxLength(T[] array, Func<T, Integer> getLength) {
         int max = 0;
         for (T elem : array)
-            max = Math.max(max, elem.length());
+            max = Math.max(max, getLength.run(elem));
 
         return max;
     }
 
-    interface Measurable {
-        int length();
+    // Similar to C# Func
+    interface Func<I, R> {
+        R run(I e);
     }
 }
+    
