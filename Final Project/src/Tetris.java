@@ -1,31 +1,24 @@
-import Common.CliGraphics;
-
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
 public class Tetris {
-    private final PrintStream output;
+    private final Renderer renderer;
     private final Scanner scanner;
 
     public Tetris(
         InputStream input,
         PrintStream output
     ) {
-        this.output = output;
+        this.renderer = new Renderer(output);
         this.scanner = new Scanner(input);
     }
 
     public void start() {
-        output.flush();
-        output.println(
-            CliGraphics.addBorder("Welcome to Tetris\nWritten in Java\nBy: Alfred F.")
+        renderer.clear();
+        renderer.renderWithBorder(
+            " Welcome to Tetris \n" +
+            " Press A to Continue "
         );
-
-        output.println();
-    }
-
-    public void stop() {
-        scanner.close();
     }
 }
