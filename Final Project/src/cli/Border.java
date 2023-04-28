@@ -1,6 +1,6 @@
-package CLI;
+package cli;
 
-import AllPurpose.AnsiCharacters;
+import all_purpose.AnsiCharacters;
 
 public class Border {
     // Border Presets
@@ -12,25 +12,13 @@ public class Border {
     public static final Border ARROW_BORDER = new Border('↘', '↙', '-', '|', '↗', '↖');
     public static final Border BOLD_BORDER = new Border('┏', '┓', '━', '┃', '┗', '┛');
 
-    private final char topLeft;
-    private final char topRight;
     private final char horizontalSide;
     private final char verticalSide;
-    private final char bottomLeft;
     private final char bottomRight;
+    private final char bottomLeft;
+    private final char topRight;
+    private final char topLeft;
     private String colour;
-
-    public Border(
-        Border border
-    ) {
-        this.horizontalSide = border.horizontalSide;
-        this.verticalSide = border.verticalSide;
-        this.bottomRight = border.bottomRight;
-        this.bottomLeft = border.bottomLeft;
-        this.topRight = border.topRight;
-        this.topLeft = border.topLeft;
-        this.colour = border.colour;
-    }
 
     public Border(
         char topLeft,
@@ -46,6 +34,20 @@ public class Border {
         this.bottomLeft = bottomLeft;
         this.topRight = topRight;
         this.topLeft = topLeft;
+    }
+
+    // Extending Object.clone is not possible
+    // as it's broken. So this static method
+    // will serve as a way to clone Borders
+    public static Border from(Border border) {
+        return new Border(
+            border.topLeft,
+            border.topRight,
+            border.horizontalSide,
+            border.verticalSide,
+            border.bottomLeft,
+            border.bottomRight
+        );
     }
 
     public void setColour(String colour) {

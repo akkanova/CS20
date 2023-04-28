@@ -1,30 +1,32 @@
-import AllPurpose.AnsiCharacters;
-import CLI.Border;
-import CLI.Formatters;
+import all_purpose.AnsiCharacters;
+import cli.Border;
+import cli.Formatters;
+
 import java.io.PrintStream;
 
 // This is a class designed to handle
 // the rendering of Graphics
 public class Renderer {
+    private final Border defaultBorder = Border.from(Border.BOLD_BORDER);
+    private final Border errorBorder = Border.from(Border.BOLD_BORDER);
     private final PrintStream output;
-    private final Border defaultBorder;
 
     public Renderer(PrintStream output) {
-        this.output = output;
-        defaultBorder = new Border(Border.BOLD_BORDER);
         defaultBorder.setColour(AnsiCharacters.GREEN_FG);
+        errorBorder.setColour(AnsiCharacters.RED_FG);
+        this.output = output;
     }
 
-    public void clear() {
+    public void print(String content) {
         output.flush();
+        output.print(content);
     }
 
-    public void render(String graphics) {
-        output.flush();
-        output.print(graphics);
+    public void printError(String error) {
+        print(Formatters.addBorder(error, errorBorder));
     }
 
-    public void renderWithBorder(String graphics) {
-        render(Formatters.addBorder(graphics, Formatters.TextAlign.CENTER, defaultBorder));
+    public void printWithBorder(String content) {
+        print(Formatters.addBorder(content, defaultBorder));
     }
 }

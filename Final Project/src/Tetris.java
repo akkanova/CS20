@@ -15,10 +15,14 @@ public class Tetris {
     }
 
     public void start() {
-        renderer.clear();
-        renderer.renderWithBorder(
+        renderer.printWithBorder(
             " Welcome to Tetris \n" +
             " Press A to Continue "
         );
+
+        char key = scanner.next().toUpperCase().charAt(0);
+        if (key != 'A') return;
+
+        renderer.printError("Hello");
     }
 }

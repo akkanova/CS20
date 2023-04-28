@@ -1,4 +1,4 @@
-package AllPurpose;
+package all_purpose;
 
 // This is class to hold Ansi Characters
 // for CLI Graphics

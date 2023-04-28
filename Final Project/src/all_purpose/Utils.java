@@ -1,4 +1,4 @@
-package AllPurpose;
+package all_purpose;
 
 // A misc class for misc tools
 public class Utils {

@@ -1,6 +1,6 @@
-package CLI;
+package cli;
 
-import AllPurpose.Utils;
+import all_purpose.Utils;
 
 // This a utility class designed for formatting
 // CLI elements and designs.
@@ -11,16 +11,11 @@ public class Formatters {
         RIGHT
     }
 
-
-    public static String addBorder(String input) {
-        return addBorder(input, TextAlign.CENTER);
+    public static String addBorder(String input, Border border) {
+        return addBorder(input, border, TextAlign.CENTER);
     }
 
-    public static String addBorder(String input, TextAlign align) {
-        return addBorder(input, align, Border.BOLD_BORDER);
-    }
-
-    public static String addBorder(String input, TextAlign align, Border border) {
+    public static String addBorder(String input, Border border, TextAlign align) {
         StringBuilder builder = new StringBuilder();
         String[] lines = input.split("\n");
 
