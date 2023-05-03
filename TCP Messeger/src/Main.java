@@ -1,8 +1,8 @@
-import all_purpose.AnsiCharacters;
-import all_purpose.Questioner;
-import cli.Border;
-import cli.Formatters;
+import all_purpose.*;
+import cli.*;
+import tcp.TCPServer;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -29,7 +29,13 @@ public class Main {
 
     /** The server socket is used to listen for incoming connections */
     public static void startServerSocket() {
+        try {
+            TCPServer server = new TCPServer();
 
+        } catch (IOException e) {
+            printError(" Cannot Establish TCP Server ");
+            throw new RuntimeException(e);
+        }
     }
 
     /** Client socket is used to initiate a connection with a remote server. */
