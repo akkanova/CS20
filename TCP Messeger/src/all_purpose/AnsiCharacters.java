@@ -1,7 +1,9 @@
 package all_purpose;
 
-// This is class to hold Ansi Characters
-// for CLI Graphics
+/**
+* This is class to hold Ansi Characters
+* for CLI Graphics
+ * */
 public class AnsiCharacters {
     // Ansi Escape Sequences
     // more info: https://en.wikipedia.org/wiki/ANSI_escape_code

@@ -1,9 +1,9 @@
 package cli;
 
-import all_purpose.Utils;
-
-// This a utility class designed for formatting
-// CLI elements and designs.
+/**
+ * This a utility class designed for formatting
+ * CLI elements and designs.
+ */
 public class Formatters {
     public enum TextAlign {
         LEFT,
@@ -19,7 +19,10 @@ public class Formatters {
         StringBuilder builder = new StringBuilder();
         String[] lines = input.split("\n");
 
-        int width = Utils.getMaxLength(lines, String::length);
+        int width = 0;
+        for (String line : lines)
+            width = Math.max(width, line.length());
+
         builder.append(border.getTop(width));
 
         for (String line : lines) builder

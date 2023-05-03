@@ -36,9 +36,11 @@ public class Border {
         this.topLeft = topLeft;
     }
 
-    // Extending Object.clone is not possible
-    // as it's broken. So this static method
-    // will serve as a way to clone Borders
+    /**
+     * Extending Object.clone() is not possible
+     * as it's broken. So this factory method
+     * will serve as a way to clone Borders
+     */
     public static Border from(Border border) {
         return new Border(
             border.topLeft,
