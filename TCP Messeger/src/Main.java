@@ -1,5 +1,6 @@
 import all_purpose.*;
 import cli.*;
+import tcp.TCPClient;
 import tcp.TCPServer;
 
 import java.io.IOException;
@@ -29,10 +30,17 @@ public class Main {
 
     /** The server socket is used to listen for incoming connections */
     public static void startServerSocket() {
-        try {
-            TCPServer server = new TCPServer();
+        try (TCPServer server = new TCPServer()) {
+            System.out.println(format(
+                " You're listening to \nHostname: " +
+                server.getHostname() +
+                "\nPort: " +
+                server.getPort()
+            ));
 
-        } catch (IOException e) {
+            server.start();
+
+        } catch (Exception e) {
             printError(" Cannot Establish TCP Server ");
             throw new RuntimeException(e);
         }
@@ -49,6 +57,15 @@ public class Main {
             " What is the port of the server? \n" +
             "Any integers (0 - 65535)"
         ));
+
+        try (TCPClient client = new TCPClient()) {
+            client.connect(hostname, port);
+
+
+        } catch (IOException e) {
+            printError(" Cannot Connect to Server ");
+            throw new RuntimeException(e);
+        }
     }
 
 

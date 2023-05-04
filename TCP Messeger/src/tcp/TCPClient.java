@@ -4,11 +4,12 @@ import java.io.*;
 import java.net.Socket;
 
 public class TCPClient extends BaseTCP {
-    public TCPClient(String hostname, int port) throws IOException {
+    public void connect(String hostname, int port) throws IOException {
         bindClientSocket(new Socket(hostname, port));
     }
 
-    public void stop() throws IOException {
+    public void close() throws IOException {
         clientSocket.close();
+        closeStreams();
     }
 }

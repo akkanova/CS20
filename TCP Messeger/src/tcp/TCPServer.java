@@ -13,11 +13,24 @@ public class TCPServer extends BaseTCP {
 
     public TCPServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
+    }
+
+    public void start() throws IOException {
         bindClientSocket(serverSocket.accept());
     }
 
-    public void stop() throws IOException {
+    public String getHostname() {
+        return serverSocket.getInetAddress().getHostAddress();
+    }
+
+    public int getPort() {
+        return serverSocket.getLocalPort();
+    }
+
+    public void close() throws IOException {
         clientSocket.close();
         serverSocket.close();
+        closeStreams();
     }
+
 }
