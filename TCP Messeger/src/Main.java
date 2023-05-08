@@ -1,9 +1,9 @@
 import all_purpose.*;
 import cli.*;
-import tcp.TCPClient;
-import tcp.TCPServer;
+import tcp.*;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
 
@@ -17,22 +17,24 @@ public class Main {
         ERROR_BORDER.setColour(AnsiCharacters.RED_FG);
 
         char answer = questioner.askYesOrNoQuestion(format(
-            " Do you want to connect to a server? \n" +
+            " Do you want to initiate the connection? \n" +
             "y / n "
         )).charAt(0);
 
         if (answer == 'n') {
-            startServerSocket();
-        } else {
             startClientSocket();
+        } else {
+            startServerSocket();
         }
     }
 
-    /** The server socket is used to listen for incoming connections */
+
+    /** The server socket is required to initiate the tcp communication */
     public static void startServerSocket() {
         try (TCPServer server = new TCPServer()) {
+            questioner.clearConsole();
             System.out.println(format(
-                " You're listening to \nHostname: " +
+                " People can now connect to you, through \nHostname: " +
                 server.getHostname() +
                 "\nPort: " +
                 server.getPort()
@@ -40,28 +42,36 @@ public class Main {
 
             server.start();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             printError(" Cannot Establish TCP Server ");
             throw new RuntimeException(e);
         }
     }
 
-    /** Client socket is used to initiate a connection with a remote server. */
+
+    /**
+     * The client socket can only connect to an already initiated and
+     * listening server tcp socket
+     *  */
     public static void startClientSocket() {
         String hostname = questioner.askQuestion(format(
-            " What is the hostname of the server? \n" +
+            " What is the Hostname of the target? \n" +
             "E.g. 'Google.com', '192.168.1.1'"
         ));
 
         int port = questioner.askNumericQuestion(format(
-            " What is the port of the server? \n" +
+            " What is the Port of the target? \n" +
             "Any integers (0 - 65535)"
         ));
 
         try (TCPClient client = new TCPClient()) {
+            questioner.clearConsole();
             client.connect(hostname, port);
 
 
+        } catch (UnknownHostException e) {
+            printError(" Invalid Hostname and  ");
+            startClientSocket();
         } catch (IOException e) {
             printError(" Cannot Connect to Server ");
             throw new RuntimeException(e);

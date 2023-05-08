@@ -14,9 +14,13 @@ public class AnsiCharacters {
     public static final String HIDE_CURSOR = CSI + "?25h";
     public static final String SHOW_CURSOR = CSI + "?25l";
 
+    // Move cursor to the top left corner (CSI + "H") then clear everything (CSI + "2J")
+    public static final String CLEAR_SCREEN = CSI + "H" + CSI + "2J";
+
     // Ansi SGR (see wiki)
     public static final String RESET = CSI + "0m";
     public static final String BOLD = CSI + "1m";
+
 
     // 3-Bit / 4-Bit Colors (see wiki)
     public static final String BLACK_FG = CSI + "30m";

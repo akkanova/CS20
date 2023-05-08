@@ -33,4 +33,9 @@ public record Questioner(Scanner scanner) {
             Pattern.matches("^\\d+$", answer)
         ));
     }
+
+    public void clearConsole() {
+        System.out.print(AnsiCharacters.CLEAR_SCREEN);
+        System.out.flush();
+    }
 }
