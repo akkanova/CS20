@@ -10,12 +10,13 @@ public class TetrisWindow extends JFrame {
     public TetrisWindow(int width, int height, String title) {
         super(title);
         super.setSize(width, height);
+        super.setLayout(new CardLayout());
         super.setLocationByPlatform(true);
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         // Load Images
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Image icon = toolkit.createImage("sample.jfif");
+        Image icon = toolkit.createImage("res/icon.png");
         super.setIconImage(icon);
     }
 
