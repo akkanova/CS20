@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -6,7 +7,7 @@ public class Main {
         // different from this one, running main) we use this function, and to also avoid
         // abnormal issues that can occur with Java's Multi-threaded asynchronicity
         SwingUtilities.invokeLater(() -> {
-            // Load all the images and icons first.
+            // Load all the resources first.
             Resources.load();
             new TetrisMenu();
         });
