@@ -8,7 +8,7 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             // Load all the resources first.
             Resources.load();
-            new UI();
+            new Window();
         });
     }
 }

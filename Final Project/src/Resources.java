@@ -13,7 +13,7 @@ public class Resources {
 
     /** Load Everything Sequentially */
     public static void load() {
-        loadImage("icon.png"); // Made using https://www.pixilart.com/draw
+        loadImage("icon.png");
         loadFont("Monocraft"); // Credit to https://github.com/IdreesInc/Monocraft
     }
 
