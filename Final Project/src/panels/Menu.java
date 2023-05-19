@@ -46,10 +46,35 @@ public class Menu extends JPanel {
         return new Dimension(width, height);
     }
 
+
+    // Graphics Rendering because the normal swing UI sucks
+
     @Override
     public void paint(Graphics g) {
-        g.drawRect(0, 0, width - 10, height - 10);
-//        g.setColor(new Color());
-//        g.fillRect(0, 0, );
+        // g is actually an instance of Graphics2D since you cannot
+        // create an instance of Graphics (it's an abstract class)
+        Graphics2D graphics = (Graphics2D) g;
+
+        // Draw Background
+        graphics.setColor(new Color(54, 57, 63));
+        graphics.fillRect(0, 0, width, height);
+
+        // Set Foreground Color
+        graphics.setColor(new Color(187, 187, 187));
+        paintMenu(graphics);
+    }
+
+    private void paintMenu(Graphics2D g) {
+        // Draw Title
+        Font titleFont = new Font("Monocraft", Font.BOLD, 50);
+        drawCenteredText(g, "BLOCKS", titleFont, 70);
+    }
+
+    /** Utility function designed to center text */
+    private void drawCenteredText(Graphics2D g, String text, Font font, int y) {
+        FontMetrics metrics = getFontMetrics(font);
+        int x = (width - metrics.stringWidth(text)) / 2;
+        g.setFont(font);
+        g.drawString(text, x, y);
     }
 }

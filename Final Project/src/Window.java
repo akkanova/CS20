@@ -15,7 +15,7 @@ public class Window extends JFrame {
 
     public Window(int width, int height) {
         // JFrame Setup
-        super("Block Stacking Game");
+        super("Blocks: Stacking Game");
         setLayout(layout); // CardLayout allows for switching of panels
         setResizable(false);
         setLocationRelativeTo(null); // null = Center of the screen
