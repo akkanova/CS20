@@ -1,3 +1,5 @@
+package common;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -6,14 +8,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/** The class that loads the images and other graphics required */
-public class Resources {
+/** A static methods class that loads the images and other graphics required */
+public class ResourceManager {
     private static final Map<String, BufferedImage> imageCache = new HashMap<>();
-    private static final String baseDir = "res/"; // Base Directory
+    private static final String baseDir = "res/"; // Base Files Directory
 
-    /** Load Everything Sequentially */
-    public static void load() {
+    public static void loadInitialFiles() {
+        // Yes, I drew all the pixel art used in this game
+        // to prevent "copyright" and "licensing issues".
         loadImage("icon.png");
+        loadImage("enter-key.png");
         loadFont("Monocraft"); // Credit to https://github.com/IdreesInc/Monocraft
     }
 

@@ -1,3 +1,6 @@
+import common.ResourceManager;
+import ui.Window;
+
 import javax.swing.*;
 
 public class Main {
@@ -7,8 +10,8 @@ public class Main {
         // abnormal issues that can occur with Java's Multi-threaded asynchronicity
         SwingUtilities.invokeLater(() -> {
             // Load all the resources first.
-            Resources.load();
-            new Window();
+            ResourceManager.loadInitialFiles();
+            new Window(1);
         });
     }
 }
