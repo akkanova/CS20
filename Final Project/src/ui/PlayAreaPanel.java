@@ -1,6 +1,7 @@
 package ui;
 
 import common.GraphicsUtils;
+import game.Board;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,6 +9,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class PlayAreaPanel extends JPanel {
+    private Board board;
     private int height;
     private int width;
 
@@ -30,8 +32,7 @@ public class PlayAreaPanel extends JPanel {
     public void start(int width, int height) {
         this.width = width;
         this.height = height;
-
-        // Start Game Logic stuff
+        this.board = new Board();
     }
 
 
