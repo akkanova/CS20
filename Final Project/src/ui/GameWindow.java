@@ -5,23 +5,23 @@ import common.ResourceManager;
 import javax.swing.*;
 import java.awt.*;
 
-public class Window extends JFrame {
+public class GameWindow extends JFrame {
     // The panel used for switching between MenuPanel and PlayAreaPanel
     private final JPanel cards = new JPanel(new CardLayout());
     public final PlayAreaPanel playAreaPanel;
     public final MenuPanel menuPanel;
 
-    public final int BLOCKS_HEIGHT = 24;
-    public final int BLOCKS_WIDTH = 17;
+    public static final int BLOCKS_HEIGHT = 24;
+    public static final int BLOCKS_WIDTH = 17;
     // Dictates the size of the UI while retaining UI component size ratios
     public double guiScale;
 
-    public Window() {
+    public GameWindow() {
         // Set GUI scaling based on your screen height
         this((int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() / 24 / 20));
     }
 
-    public Window(int guiScale) {
+    public GameWindow(int guiScale) {
         // JFrame Setup
         super("Blocks: Stacking Game");
         setResizable(false);

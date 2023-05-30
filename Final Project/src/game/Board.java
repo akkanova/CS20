@@ -1,37 +1,41 @@
 package game;
 
-import common.Misc;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /** Board holding tetromino and blocks positions */
 public class Board {
+    private ArrayList<Tetromino.Shape> bag; // Next pieces
+    private Tetromino.Shape[][] well; // Immovable blocks at the bottom
     private Tetromino currentPiece;
-    private Tetromino.Shape nextPieceShape;
 
-    private final int boardWidth;
-    private final int boardHeight;
+    public final int boardWidth;
+    public final int boardHeight;
 
-    public Board() {
-        this(10, 22);
-    }
+    public Board() { this(10, 22); }
 
     public Board(int width, int height) {
         boardHeight = height;
         boardWidth = width;
+        bag = new ArrayList<>();
     }
 
-    public Tetromino getCurrentPiece() { return currentPiece; }
-    public Tetromino.Shape getNextPieceShape() { return nextPieceShape; }
+    public void generateNewPiece() {
+        if (bag.isEmpty()) {
+            // The bag should contain all possible shapes
+            // With the sequence they appear in completely random.
+            Collections.addAll(bag, Tetromino.Shape.values());
+            Collections.shuffle(bag);
+        }
 
-    public void generateNextPiece() {
-        currentPiece = new Tetromino(nextPieceShape);
-        nextPieceShape = Misc.getRandomEnumValue(Tetromino.Shape.class);
+        currentPiece = new Tetromino(bag.get(0));
+        bag.remove(0);
     }
 
-    public boolean isValidMove(int newX, int newY) {
-        return false;
+    public Tetromino.Shape getNextPiece() {
+        if (bag.size() < 1) generateNewPiece();
+        return bag.get(0);
     }
 
-    public void moveCurrentPiece(int newX, int newY) {
 
-    }
 }

@@ -5,36 +5,28 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /** A static methods class that loads the images and other graphics required */
 public class ResourceManager {
-    private static final Map<String, BufferedImage> imageCache = new HashMap<>();
     private static final String baseDir = "res/"; // Base Files Directory
+    private static String texturePack;
 
-    public static void loadInitialFiles() {
-        // Yes, I drew all the pixel art used in this game
-        // to prevent "copyright" and "licensing issues".
-        loadImage("icon.png");
-        loadImage("enter-key.png");
-        loadFont("Monocraft"); // Credit to https://github.com/IdreesInc/Monocraft
+    public static void setTexturePack(String pack) {
+        texturePack = pack;
+    }
+
+    public static BufferedImage loadBlockTexture(String block) {
+        return loadImage(texturePack + "/" + block + ".png");
     }
 
     /**
      * Loads the image and stores it into the image Cache, so it can be
-     * fetched again in the future without having to load it again.
+     * fetched again in the future without having to read it again.
      */
     public static BufferedImage loadImage(String filename) {
-        if (imageCache.containsKey(filename))
-            return imageCache.get(filename);
-
         String fullPath = baseDir + filename;
         try {
-            BufferedImage image = ImageIO.read(new File(fullPath));
-            imageCache.put(filename, image);
-            return image;
-
+            return ImageIO.read(new File(fullPath));
         } catch (IOException e) {
             System.err.println("Failed to load image: " + fullPath);
             e.printStackTrace();
