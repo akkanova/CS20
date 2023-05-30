@@ -6,10 +6,17 @@ import java.awt.*;
 public class GraphicsUtils {
     public final Color BG_COLOR = new Color(54, 57, 63); // Background Color
     public final Color FG_TEXT_COLOR = new Color(187, 187, 187); // Foreground Color
+    public final Font SUB_HEADER_FONT;
+    public final Font HEADER_FONT;
+    public final Font PLAIN_FONT;
 
     private final Graphics2D graphics;
 
-    public GraphicsUtils(Graphics2D g) {
+    public GraphicsUtils(Graphics2D g, double guiScale) {
+        SUB_HEADER_FONT = new Font("Monocraft", Font.PLAIN, (int) (15 * guiScale));
+        HEADER_FONT = new Font("Monocraft", Font.BOLD, (int) (50 * guiScale));
+        PLAIN_FONT = new Font("Monocraft", Font.BOLD, (int) (15 * guiScale));
+
         graphics = g;
     }
 

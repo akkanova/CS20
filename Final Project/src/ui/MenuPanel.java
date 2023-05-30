@@ -9,11 +9,11 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class MenuPanel extends JPanel {
-    private final GameWindow gameWindow;
+    private final GameWindow parent;
 
-    public MenuPanel(GameWindow GameWindow) {
+    public MenuPanel(GameWindow gameWindow) {
         setFocusable(true); // A component needs to be focusable to use a KeyListener
-        this.gameWindow = GameWindow;
+        parent = gameWindow;
 
         // Add KeyListener
         addKeyListener(new KeyAdapter() {
@@ -21,9 +21,13 @@ public class MenuPanel extends JPanel {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() != KeyEvent.VK_ENTER) return;
 
-                GameWindow.setCurrentPanel("PlayAreaPanel");
-                GameWindow.playAreaPanel.start(GameWindow.getScreenWidth(), GameWindow.getScreenHeight());
-                GameWindow.playAreaPanel.grabFocus();
+                parent.setCurrentPanel("PlayAreaPanel");
+                parent.playAreaPanel.grabFocus();
+                parent.playAreaPanel.start(
+                        parent.getScreenWidth(),
+                        parent.getScreenHeight(),
+                        parent.guiScale
+                );
             }
         });
     }
@@ -33,7 +37,10 @@ public class MenuPanel extends JPanel {
         // When `ui.Window.pack()` is called it resizes itself accurately according to the size of
         // its child component's (this) size. Which is weirdly more accurate than `ui.Window.setSize(w,h)`.
         // This hacky solution prevents the weird out of bounds draw issues from occurring.
-        return new Dimension(gameWindow.getScreenWidth(), gameWindow.getScreenHeight());
+        return new Dimension(
+            parent.getScreenWidth(),
+            parent.getScreenHeight()
+        );
     }
 
 
@@ -44,23 +51,29 @@ public class MenuPanel extends JPanel {
         // `graphics` is actually an instance of Graphics2D since you cannot
         // create an instance of Graphics (it's an abstract class)
         Graphics2D g = (Graphics2D) graphics;
-        GraphicsUtils utils = new GraphicsUtils(g);
+        GraphicsUtils utils = new GraphicsUtils(g, parent.guiScale);
 
-        int width = gameWindow.getScreenWidth();
-        int height = gameWindow.getScreenHeight();
+        int width = parent.getScreenWidth();
+        int height = parent.getScreenHeight();
 
         // Draw Background
         utils.drawBackground(width, height);
 
         // Draw Foreground
-        Font titleFont = new Font("Monocraft", Font.BOLD, (int) (50 * gameWindow.guiScale));
-        Font subTitleFont = new Font("Monocraft", Font.PLAIN, (int) (15 * gameWindow.guiScale));
-
         g.setColor(utils.FG_TEXT_COLOR);
-        utils.drawCenteredText("BLOCKS", titleFont, width, titleFont.getSize() + 20); // Title
-        utils.drawCenteredText("STACKING GAME", subTitleFont, width, titleFont.getSize() + subTitleFont.getSize() + 25); // Sub-Title
+        utils.drawCenteredText(
+                "BLOCKS",
+                utils.HEADER_FONT, width,
+                utils.HEADER_FONT.getSize() + 20
+        ); // Title
 
-        int imageSize = (int) (100 * gameWindow.guiScale);
+        utils.drawCenteredText(
+                "STACKING GAME",
+                utils.SUB_HEADER_FONT, width,
+                utils.HEADER_FONT.getSize() + utils.SUB_HEADER_FONT.getSize() + 25
+        ); // Sub-Title
+
+        int imageSize = (int) (100 * parent.guiScale);
         int imageOffset = imageSize / 2;
         g.drawImage(
             ResourceManager.loadImage("enter-key.png"),
@@ -71,8 +84,8 @@ public class MenuPanel extends JPanel {
 
         utils.drawCenteredText(
             "Press ENTER to Start.",
-            new Font("Monocraft", Font.BOLD, (int) (15 * gameWindow.guiScale)),
-            width, height / 2 + imageOffset + (int) (20 * gameWindow.guiScale)
+            utils.PLAIN_FONT, width,
+            height / 2 + imageOffset + (int) (20 * parent.guiScale)
         );
     }
 }
