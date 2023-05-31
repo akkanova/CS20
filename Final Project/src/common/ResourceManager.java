@@ -19,10 +19,6 @@ public class ResourceManager {
         return loadImage(texturePack + "/" + block + ".png");
     }
 
-    /**
-     * Loads the image and stores it into the image Cache, so it can be
-     * fetched again in the future without having to read it again.
-     */
     public static BufferedImage loadImage(String filename) {
         String fullPath = baseDir + filename;
         try {

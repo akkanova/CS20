@@ -3,6 +3,7 @@ package ui;
 import common.GraphicsUtils;
 import common.ResourceManager;
 import game.Board;
+import game.Tetromino;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,9 +63,9 @@ public class PlayAreaPanel extends JPanel {
             g.setColor(utils.FG_TEXT_COLOR);
             utils.drawCenteredText("PAUSED", utils.HEADER_FONT, width, height / 2);
             utils.drawCenteredText(
-                    "Press P to Unpause.",
-                    utils.PLAIN_FONT, width,
-                    height / 2 + utils.HEADER_FONT.getSize() + 10
+                "Press P to Unpause.",
+                utils.PLAIN_FONT, width,
+                height / 2 + utils.HEADER_FONT.getSize() + 10
             );
 
             return;
@@ -77,18 +78,28 @@ public class PlayAreaPanel extends JPanel {
         for (int col = 0; col < columns; col++) {
             for (int row = 0; row < rows; row++) {
 
+                int xPos = col * blockSize;
+                int yPos = row * blockSize;
+
                 // Draw the Border
                 if (row == 0 || row == board.boardHeight + 1 ||
                     col == 0 || col == board.boardWidth + 1 ||
                     col == columns - 1) {
 
-                    int xPos = col * blockSize;
-                    int yPos = row * blockSize;
-
                     g.drawImage(
-                            ResourceManager.loadBlockTexture("border"),
-                            xPos, yPos, blockSize, blockSize, null
+                        ResourceManager.loadBlockTexture("Border"),
+                        xPos, yPos, blockSize, blockSize, null
                     );
+
+                // Draw the tetris blocks
+                } else if ((row <= board.boardHeight) && (col <= board.boardWidth)) {
+                   Tetromino.Shape shape =
+                       board.getBlock(col - 1, row - 1);
+
+                   if (shape != null) g.drawImage(
+                        ResourceManager.loadBlockTexture(shape.name()),
+                        xPos, yPos, blockSize, blockSize, null
+                   );
                 }
             }
         }

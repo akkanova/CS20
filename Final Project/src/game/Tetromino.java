@@ -53,48 +53,19 @@ public class Tetromino {
         };
     }
 
+    // Setters
+
     public void setBlocksCoordinates(Point[] coordinates) {
         this.blocksCoordinates = coordinates;
     }
+
+    // Getters
 
     public Point[] getBlocksCoordinates() {
         return this.blocksCoordinates;
     }
 
-    public void rotateLeft() {
-        // `rotateLeft` seems like a more straight forward and easier
-        // to understand name than `rotateCounterClockwise`
-        rotate(RotationDirection.CounterClockwise);
-    }
-
-    public void rotateRight() {
-        rotate(RotationDirection.Clockwise);
-    }
-
-    private void rotate(RotationDirection direction) {
-        // Rotation doesn't make sense for a square
-        if (shape == Shape.Square) return;
-
-        // Explanation for how this all works:
-        // (visualize in desmos for more clarity)
-        // Take for example point { -5, -5 } to rotate it right (Clockwise),
-        // we set the new value of X to the value of it's Y. So now it's { -5, _ }.
-        // Then we set the new value of Y to the value it's old X times negative.
-        // So now it's pos is { -5, 5 }. To rotate to the left (Counter-Clockwise)
-        // we don't multiply the new value of Y with a negative, instead we do it for
-        // the new value of X instead.
-
-        int xDirection = direction == RotationDirection.Clockwise ? 1 : -1;
-        int yDirection = direction == RotationDirection.Clockwise ? -1 : 1;
-
-        Point[] oldCoordinates = getBlocksCoordinates();
-        Point[] newCoordinates = new Point[4];
-
-        for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
-            newCoordinates[blockIndex].x = oldCoordinates[blockIndex].y * xDirection;
-            newCoordinates[blockIndex].y = oldCoordinates[blockIndex].x * yDirection;
-        }
-
-        setBlocksCoordinates(newCoordinates);
+    public Tetromino.Shape getShape() {
+        return this.shape;
     }
 }
