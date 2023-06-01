@@ -15,8 +15,9 @@ public class Tetromino {
     // (4 blocks in total), for rotation calculation
     private Point[] blocksOffsets;
 
-    // The x and y location of each block, relative to the Board
-    private Point[] blockCoordinates;
+    // The x and y location of this piece
+    // relative to the grid
+    private Point currentPosition;
 
     /**
      * The Distinct shapes of Tetrominoes.
@@ -36,8 +37,8 @@ public class Tetromino {
 
     public Tetromino(Shape shape) {
         this.shape = shape;
+        this.currentPosition = new Point();
         this.blocksOffsets = getBlockOffsets(shape);
-        this.blockCoordinates = getEmptyPointArray();
     }
 
     /** get initial block offsets based on Tetromino shape */
@@ -58,17 +59,26 @@ public class Tetromino {
         return new Point[] { new Point(), new Point(), new Point(), new Point() };
     }
 
-    /** Add delta (Axis) to current (Axis) position */
-    public Point[] translate(int deltaX, int deltaY) {
-        Point[] oldCoordinates = getBlocksCoordinates();
-        Point[] newCoordinates = getEmptyPointArray();
+    /** Equally add the value of a Point to an array of Points */
+    public static Point[] addOffsetsAndPosition(Point[] offsets, Point position) {
+        Point[] coordinates = getEmptyPointArray();
 
         for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
-            newCoordinates[blockIndex].x = oldCoordinates[blockIndex].x + deltaX;
-            newCoordinates[blockIndex].y = oldCoordinates[blockIndex].y + deltaY;
+            coordinates[blockIndex].x = offsets[blockIndex].x + position.x;
+            coordinates[blockIndex].y = offsets[blockIndex].y + position.y;
         }
 
-        return newCoordinates;
+        return coordinates;
+    }
+
+    /** Add delta (Axis) to current (Axis) position */
+    public Point[] translate(int deltaX, int deltaY) {
+        Point newPosition = new Point(
+            currentPosition.x + deltaX,
+            currentPosition.y + deltaY
+        );
+
+        return addOffsetsAndPosition(blocksOffsets, newPosition);
     }
 
     /**
@@ -100,15 +110,20 @@ public class Tetromino {
         this.blocksOffsets = blocksOffsets;
     }
 
-    public void setBlockCoordinates(Point[] blockCoordinates) {
-        this.blockCoordinates = blockCoordinates;
+    public void setCurrentPosition(int x, int y) {
+        currentPosition.x = x;
+        currentPosition.y = y;
     }
 
 
     // Getters
 
-    public Point[] getBlocksCoordinates() {
-        return blockCoordinates;
+    public Point[] getBlockCoordinates() {
+        return addOffsetsAndPosition(blocksOffsets, currentPosition);
+    }
+
+    public Point getCurrentPosition() {
+        return currentPosition;
     }
 
     public Tetromino.Shape getShape() {

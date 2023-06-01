@@ -3,6 +3,7 @@ package game;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 /** Board holding tetrominoes and main game logic */
 public class Board {
@@ -28,7 +29,7 @@ public class Board {
         boardWidth = width;
         score = 0;
 
-        grid = new Tetromino.Shape[width][height];
+        grid = new Tetromino.Shape[height][width];
         bag = new ArrayList<>();
         generateNewPiece();
     }
@@ -51,21 +52,51 @@ public class Board {
         currentPiece = new Tetromino(bag.get(0));
         bag.remove(0);
 
-        Point[] initialPosition = currentPiece.translate(boardWidth / 2, 2);
+        int yPos = 2;
+        int xPos = boardWidth / 2;
+        Point[] initialPosition = currentPiece.translate(xPos, yPos);
+
         // If It can't put the tetromino in the initial position it
         // usually means Game Over.
         if (!doesCollide(initialPosition))
-            currentPiece.setBlockCoordinates(initialPosition);
+            currentPiece.setCurrentPosition(xPos, yPos);
 
         else gameState = GameState.Stopped;
     }
 
+    /** Remove Full rows */
+    public void cleanupRows() {
+        Consumer<Integer> collapseRow = (Integer rowIndex) -> {
+            // Going up the grid to move everything down;
+            for (int row = rowIndex - 1; row > 0; row--) {
+                System.arraycopy(grid[row], 0, grid[row + 1], 0, boardWidth);
+            }
+        };
+
+        for (int row = boardHeight - 1; row > 0; row--) {
+            // Count how many columns of that row is filled
+            int colFilled = 0;
+            for (Tetromino.Shape col : grid[row])
+                if (col != null) colFilled++;
+
+            // If the Row is full collapse all the row above it
+            if (colFilled >= boardWidth) {
+
+                // To do make a queue of rows to clear, and do that instead;
+
+                collapseRow.accept(row);
+                score += 100;
+            }
+        }
+    }
+
     /** Convert the current piece into a static block within the grid */
     public void attachCurrentPieceToGrid() {
-        for (Point block : currentPiece.getBlocksCoordinates())
-            grid[block.x][block.y] = currentPiece.getShape();
+        for (Point block : currentPiece.getBlockCoordinates())
+            grid[block.y][block.x] = currentPiece.getShape();
 
         currentPiece = null;
+        cleanupRows();
         generateNewPiece();
     }
 
@@ -77,7 +108,7 @@ public class Board {
                 block.y < 0 || block.y > boardHeight - 1)
                 return true;
 
-            if (grid[block.x][block.y] != null)
+            if (grid[block.y][block.x] != null)
                 return true;
         }
 
@@ -98,10 +129,15 @@ public class Board {
     /** Returns true if the move was successful */
     private void movePiece(int deltaX, int deltaY, boolean addScore) {
         Point[] newCoordinates = currentPiece.translate(deltaX, deltaY);
+        Point currentPosition = currentPiece.getCurrentPosition();
+
         boolean doesCollideWithGrid = doesCollide(newCoordinates);
 
         if (!doesCollideWithGrid)
-            currentPiece.setBlockCoordinates(newCoordinates);
+            currentPiece.setCurrentPosition(
+                currentPosition.x + deltaX,
+                currentPosition.y + deltaY
+            );
 
         if (doesCollideWithGrid && deltaY > 0) {
             attachCurrentPieceToGrid();
@@ -117,26 +153,19 @@ public class Board {
         // Rotation doesn't make sense for a square.
         if (currentPiece.getShape() == Tetromino.Shape.Square) return;
 
+        Point currentPosition = currentPiece.getCurrentPosition();
         Point[] newOffsets = currentPiece.rotate(xDirection, yDirection);
-        Point[] oldCoordinates = currentPiece.getBlocksCoordinates();
-        Point[] newCoordinates = Tetromino.getEmptyPointArray();
+        Point[] newCoordinates = Tetromino.addOffsetsAndPosition(newOffsets, currentPosition);
 
-        for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
-            newCoordinates[blockIndex].x = newOffsets[blockIndex].x + oldCoordinates[blockIndex].x;
-            newCoordinates[blockIndex].y = newOffsets[blockIndex].y + oldCoordinates[blockIndex].y;
-        }
-
-        if (!doesCollide(newCoordinates)) {
+        if (!doesCollide(newCoordinates))
             currentPiece.setBlocksOffsets(newOffsets);
-            currentPiece.setBlockCoordinates(newCoordinates);
-        }
     }
 
 
     // Getters
 
     public Tetromino.Shape getBlock(int x, int y) {
-        return grid[x][y];
+        return grid[y][x];
     }
 
     public GameState getGameState() {

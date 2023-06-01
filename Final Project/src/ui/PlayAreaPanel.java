@@ -141,7 +141,7 @@ public class PlayAreaPanel extends JPanel {
 
         // Draw Current Tetromino Piece
         Tetromino currentPiece = board.getCurrentPiece();
-        for (Point block : currentPiece.getBlocksCoordinates()) {
+        for (Point block : currentPiece.getBlockCoordinates()) {
             int xPos = (block.x + 1) * blockSize;
             int yPos = (block.y + 1) * blockSize;
 
