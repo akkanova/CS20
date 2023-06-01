@@ -48,44 +48,44 @@ public class MenuPanel extends JPanel {
 
     @Override
     public void paintComponent(Graphics graphics) {
+        int screenWidth = parent.getScreenWidth();
+        int screenHeight = parent.getScreenHeight();
+
         // `graphics` is actually an instance of Graphics2D since you cannot
         // create an instance of Graphics (it's an abstract class)
         Graphics2D g = (Graphics2D) graphics;
-        GraphicsUtils utils = new GraphicsUtils(g, parent.guiScale);
-
-        int width = parent.getScreenWidth();
-        int height = parent.getScreenHeight();
+        GraphicsUtils utils = new GraphicsUtils(g, screenWidth, screenHeight, parent.guiScale);
 
         // Draw Background
-        utils.drawBackground(width, height);
+        utils.drawBackground();
 
         // Draw Foreground
         g.setColor(utils.FG_TEXT_COLOR);
         utils.drawCenteredText(
-                "BLOCKS",
-                utils.HEADER_FONT, width,
-                utils.HEADER_FONT.getSize() + 20
+            "BLOCKS",
+            utils.HEADER_FONT,
+            utils.HEADER_FONT.getSize() + 20
         ); // Title
 
         utils.drawCenteredText(
-                "STACKING GAME",
-                utils.SUB_HEADER_FONT, width,
-                utils.HEADER_FONT.getSize() + utils.SUB_HEADER_FONT.getSize() + 25
+            "STACKING GAME",
+            utils.SUB_HEADER_FONT,
+            utils.HEADER_FONT.getSize() + utils.SUB_HEADER_FONT.getSize() + 25
         ); // Sub-Title
 
         int imageSize = (int) (100 * parent.guiScale);
         int imageOffset = imageSize / 2;
         g.drawImage(
             ResourceManager.loadImage("enter-key.png"),
-            width / 2 - imageOffset, height / 2 - imageOffset, // X and Y Position
+            screenWidth / 2 - imageOffset, screenHeight / 2 - imageOffset, // X and Y Position
             imageSize, imageSize, // X and Y Size
             null
         );
 
         utils.drawCenteredText(
             "Press ENTER to Start.",
-            utils.PLAIN_FONT, width,
-            height / 2 + imageOffset + (int) (20 * parent.guiScale)
+            utils.PLAIN_FONT,
+            screenHeight / 2 + imageOffset + (int) (20 * parent.guiScale)
         );
     }
 }

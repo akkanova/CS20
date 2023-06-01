@@ -11,13 +11,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public class PlayAreaPanel extends JPanel {
-    private Board board;
-    private boolean isPaused;
-    private double guiScale;
-    private int blockSize;
-    private int height;
-    private int width;
+    public Board board;
 
+    private double guiScale;
+    private int screenHeight;
+    private int screenWidth;
+    private int blockSize;
 
     public PlayAreaPanel() {
         // Use double buffered, which uses additional memory
@@ -28,10 +27,33 @@ public class PlayAreaPanel extends JPanel {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                 if (e.getKeyCode() == KeyEvent.VK_P)
-                    isPaused = !isPaused;
+                Board.GameState gameState = board.getGameState();
+                int key = e.getKeyCode();
 
-                 repaint();
+                if (gameState == Board.GameState.Stopped &&
+                    key == KeyEvent.VK_ENTER) {
+                    restart();
+                    return;
+                }
+
+                if ((gameState == Board.GameState.Playing ||
+                     gameState == Board.GameState.Paused) &&
+                    (key == KeyEvent.VK_ESCAPE ||
+                     key == KeyEvent.VK_F1))
+                    board.pause();
+
+
+                // Movement Key Bindings
+                if (gameState == Board.GameState.Playing)
+                    switch (key) {
+                        case KeyEvent.VK_UP, KeyEvent.VK_X   -> board.rotatePieceClockWise();
+                        case KeyEvent.VK_DOWN, KeyEvent.VK_Z -> board.rotatePieceCounterClockwise();
+                        case KeyEvent.VK_LEFT  -> board.movePieceLeft();
+                        case KeyEvent.VK_RIGHT -> board.movePieceRight();
+                        case KeyEvent.VK_SPACE -> board.movePieceDown(true);
+                    }
+
+                repaint();
             }
         });
     }
@@ -39,12 +61,19 @@ public class PlayAreaPanel extends JPanel {
     /** Called after user presses the Enter key in the Menu */
     public void start(int width, int height, double guiScale) {
         blockSize = width / GameWindow.BLOCKS_WIDTH;
-        board = new Board();
+        screenHeight = height;
+        screenWidth = width;
+        board = new Board(
+            GameWindow.BLOCKS_WIDTH - 7,
+            GameWindow.BLOCKS_HEIGHT - 2
+        );
 
         this.guiScale = guiScale;
-        this.height = height;
-        this.width = width;
         repaint();
+    }
+
+    public void restart() {
+        start(screenWidth, screenHeight, guiScale);
     }
 
 
@@ -53,21 +82,27 @@ public class PlayAreaPanel extends JPanel {
     @Override
     public void paintComponent(Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics;
-        GraphicsUtils utils = new GraphicsUtils(g, guiScale);
+        GraphicsUtils utils = new GraphicsUtils(g, screenWidth, screenHeight, guiScale);
 
         // Draw Background
-        utils.drawBackground(width, height);
+        utils.drawBackground();
+        g.setColor(utils.FG_TEXT_COLOR);
+
+        // Draw Game-Over Screen
+        if (board.getGameState() == Board.GameState.Stopped) {
+            utils.drawInterruptPage("GAME OVER", "Press Enter to Try Again.");
+            utils.drawCenteredText(
+                "Score: " + board.getScore(),
+                utils.PLAIN_FONT,
+                screenHeight / 2 + utils.HEADER_FONT.getSize() +
+                utils.PLAIN_FONT.getSize() + 15
+            );
+            return;
+        }
 
         // Draw Paused Screen
-        if (isPaused) {
-            g.setColor(utils.FG_TEXT_COLOR);
-            utils.drawCenteredText("PAUSED", utils.HEADER_FONT, width, height / 2);
-            utils.drawCenteredText(
-                "Press P to Unpause.",
-                utils.PLAIN_FONT, width,
-                height / 2 + utils.HEADER_FONT.getSize() + 10
-            );
-
+        if (board.getGameState() == Board.GameState.Paused) {
+            utils.drawInterruptPage("PAUSED", "Press Esc to Unpause.");
             return;
         }
 
@@ -91,7 +126,7 @@ public class PlayAreaPanel extends JPanel {
                         xPos, yPos, blockSize, blockSize, null
                     );
 
-                // Draw the tetris blocks
+                // Draw the Tetromino block
                 } else if ((row <= board.boardHeight) && (col <= board.boardWidth)) {
                    Tetromino.Shape shape =
                        board.getBlock(col - 1, row - 1);
@@ -102,6 +137,18 @@ public class PlayAreaPanel extends JPanel {
                    );
                 }
             }
+        }
+
+        // Draw Current Tetromino Piece
+        Tetromino currentPiece = board.getCurrentPiece();
+        for (Point block : currentPiece.getBlocksCoordinates()) {
+            int xPos = (block.x + 1) * blockSize;
+            int yPos = (block.y + 1) * blockSize;
+
+            g.drawImage(
+                ResourceManager.loadBlockTexture(currentPiece.getShape().name()),
+                xPos, yPos, blockSize, blockSize, null
+            );
         }
     }
 }

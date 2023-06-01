@@ -10,8 +10,13 @@ import java.awt.*;
  * */
 public class Tetromino {
     private final Shape shape;
-    // The x and y positions of each block of a tetromino (4 blocks in total)
-    private Point[] blocksCoordinates;
+
+    // The x and y offsets of each block of a tetromino
+    // (4 blocks in total), for rotation calculation
+    private Point[] blocksOffsets;
+
+    // The x and y location of each block, relative to the Board
+    private Point[] blockCoordinates;
 
     /**
      * The Distinct shapes of Tetrominoes.
@@ -29,17 +34,13 @@ public class Tetromino {
         ZSkew // Stairs going up to the left (mirror of S)
     }
 
-    enum RotationDirection {
-        CounterClockwise,
-        Clockwise
-    }
-
     public Tetromino(Shape shape) {
         this.shape = shape;
-        this.blocksCoordinates = getBlockOffsets(shape);
+        this.blocksOffsets = getBlockOffsets(shape);
+        this.blockCoordinates = getEmptyPointArray();
     }
 
-    /** get block offsets based on Tetromino shape */
+    /** get initial block offsets based on Tetromino shape */
     public static Point[] getBlockOffsets(Shape shape) {
         return switch (shape) {
             // I suggest visualizing the points in https://www.desmos.com/calculator, for it to make some sense
@@ -53,19 +54,64 @@ public class Tetromino {
         };
     }
 
+    public static Point[] getEmptyPointArray() {
+        return new Point[] { new Point(), new Point(), new Point(), new Point() };
+    }
+
+    /** Add delta (Axis) to current (Axis) position */
+    public Point[] translate(int deltaX, int deltaY) {
+        Point[] oldCoordinates = getBlocksCoordinates();
+        Point[] newCoordinates = getEmptyPointArray();
+
+        for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
+            newCoordinates[blockIndex].x = oldCoordinates[blockIndex].x + deltaX;
+            newCoordinates[blockIndex].y = oldCoordinates[blockIndex].y + deltaY;
+        }
+
+        return newCoordinates;
+    }
+
+    /**
+     * Explanation for how this all works:
+     * (Visualize in Desmos for more clarity)
+     * Take for example point { -5, -5 } to rotate it right (Clockwise),
+     * we set the new value of X to the value of it's Y. So now it's { -5, _ }.
+     * Then we set the new value of Y to the value it's old X times negative.
+     * So now it's pos is { -5, 5 }. To rotate to the left (Counter-Clockwise)
+     * we don't multiply the new value of Y with a negative, instead we do it for
+     * the new value of X instead.
+     */
+    public Point[] rotate(int xDirection, int yDirection) {
+        Point[] oldOffset = blocksOffsets;
+        Point[] newOffset = getEmptyPointArray();
+
+        for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
+            newOffset[blockIndex].x = oldOffset[blockIndex].y * xDirection;
+            newOffset[blockIndex].y = oldOffset[blockIndex].x * yDirection;
+        }
+
+        return newOffset;
+    }
+
+
     // Setters
 
-    public void setBlocksCoordinates(Point[] coordinates) {
-        this.blocksCoordinates = coordinates;
+    public void setBlocksOffsets(Point[] blocksOffsets) {
+        this.blocksOffsets = blocksOffsets;
     }
+
+    public void setBlockCoordinates(Point[] blockCoordinates) {
+        this.blockCoordinates = blockCoordinates;
+    }
+
 
     // Getters
 
     public Point[] getBlocksCoordinates() {
-        return this.blocksCoordinates;
+        return blockCoordinates;
     }
 
     public Tetromino.Shape getShape() {
-        return this.shape;
+        return shape;
     }
 }

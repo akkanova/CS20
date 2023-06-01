@@ -4,66 +4,132 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/** Board holding tetromino and blocks positions */
+/** Board holding tetrominoes and main game logic */
 public class Board {
-    private ArrayList<Tetromino.Shape> bag; // Next pieces
-    private Tetromino.Shape[][] grid; // Blocks location (For collision and rendering)
+    private final ArrayList<Tetromino.Shape> bag; // Next pieces
+    private final Tetromino.Shape[][] grid; // Static Blocks location (For collision and rendering)
+
     private Tetromino currentPiece;
+    private GameState gameState;
+    private int score;
 
     public final int boardWidth;
     public final int boardHeight;
 
-    public Board() { this(10, 22); }
+    public enum GameState {
+        Playing,
+        Paused,
+        Stopped
+    }
 
     public Board(int width, int height) {
+        gameState = GameState.Playing;
         boardHeight = height;
         boardWidth = width;
+        score = 0;
 
         grid = new Tetromino.Shape[width][height];
         bag = new ArrayList<>();
+        generateNewPiece();
+    }
+
+    /** Pause and Unpause the game */
+    public void pause() {
+        gameState = gameState == GameState.Playing
+            ? GameState.Paused
+            : GameState.Playing;
     }
 
     public void generateNewPiece() {
         if (bag.isEmpty()) {
             // The bag should contain all possible shapes
-            // With the sequence they appear in completely random.
+            // With a completely random sequence they appear in.
             Collections.addAll(bag, Tetromino.Shape.values());
             Collections.shuffle(bag);
         }
 
         currentPiece = new Tetromino(bag.get(0));
         bag.remove(0);
+
+        Point[] initialPosition = currentPiece.translate(boardWidth / 2, 2);
+        // If It can't put the tetromino in the initial position it
+        // usually means Game Over.
+        if (!doesCollide(initialPosition))
+            currentPiece.setBlockCoordinates(initialPosition);
+
+        else gameState = GameState.Stopped;
+    }
+
+    /** Convert the current piece into a static block within the grid */
+    public void attachCurrentPieceToGrid() {
+        for (Point block : currentPiece.getBlocksCoordinates())
+            grid[block.x][block.y] = currentPiece.getShape();
+
+        currentPiece = null;
+        generateNewPiece();
+    }
+
+    /** Check whether the new coordinates overlap with other blocks */
+    public boolean doesCollide(Point[] newCoordinates) {
+        for (Point block : newCoordinates) {
+
+            if (block.x < 0 || block.x > boardWidth - 1 ||
+                block.y < 0 || block.y > boardHeight - 1)
+                return true;
+
+            if (grid[block.x][block.y] != null)
+                return true;
+        }
+
+        return false;
     }
 
 
     // Movement
 
-    // `rotateLeft` seems like a more straight forward and easier
-    // to understand name than `rotateCounterClockwise`
-    public void rotateLeft() { rotate(-1, 1); }
-    public void rotateRight() { rotate(1, -1); }
+    /**
+     * If forced is true, the invocation of the function is considered a
+     * user input and a point is added to the user's score.
+     * */
+    public void movePieceDown(boolean forced) { movePiece(0, 1, forced); }
+    public void movePieceRight() { movePiece(1, 0, false); }
+    public void movePieceLeft() { movePiece(-1, 0, false); }
 
-    private void rotate(int xDirection, int yDirection) {
-        // Explanation for how this all works:
-        // (visualize in Desmos for more clarity)
-        // Take for example point { -5, -5 } to rotate it right (Clockwise),
-        // we set the new value of X to the value of it's Y. So now it's { -5, _ }.
-        // Then we set the new value of Y to the value it's old X times negative.
-        // So now it's pos is { -5, 5 }. To rotate to the left (Counter-Clockwise)
-        // we don't multiply the new value of Y with a negative, instead we do it for
-        // the new value of X instead.
+    /** Returns true if the move was successful */
+    private void movePiece(int deltaX, int deltaY, boolean addScore) {
+        Point[] newCoordinates = currentPiece.translate(deltaX, deltaY);
+        boolean doesCollideWithGrid = doesCollide(newCoordinates);
 
+        if (!doesCollideWithGrid)
+            currentPiece.setBlockCoordinates(newCoordinates);
+
+        if (doesCollideWithGrid && deltaY > 0) {
+            attachCurrentPieceToGrid();
+            if (addScore) score += 1;
+        }
+    }
+
+    public void rotatePieceCounterClockwise() { rotatePiece(-1, 1); }
+    public void rotatePieceClockWise() { rotatePiece(1, -1); }
+
+    private void rotatePiece(int xDirection, int yDirection) {
+        if (currentPiece == null) return;
+        // Rotation doesn't make sense for a square.
+        if (currentPiece.getShape() == Tetromino.Shape.Square) return;
+
+        Point[] newOffsets = currentPiece.rotate(xDirection, yDirection);
         Point[] oldCoordinates = currentPiece.getBlocksCoordinates();
-        Point[] newCoordinates = new Point[4];
+        Point[] newCoordinates = Tetromino.getEmptyPointArray();
 
         for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
-            newCoordinates[blockIndex].x = oldCoordinates[blockIndex].y * xDirection;
-            newCoordinates[blockIndex].y = oldCoordinates[blockIndex].x * yDirection;
+            newCoordinates[blockIndex].x = newOffsets[blockIndex].x + oldCoordinates[blockIndex].x;
+            newCoordinates[blockIndex].y = newOffsets[blockIndex].y + oldCoordinates[blockIndex].y;
         }
 
-        // Collision Detection Here
-
-        currentPiece.setBlocksCoordinates(newCoordinates);
+        if (!doesCollide(newCoordinates)) {
+            currentPiece.setBlocksOffsets(newOffsets);
+            currentPiece.setBlockCoordinates(newCoordinates);
+        }
     }
 
 
@@ -73,8 +139,20 @@ public class Board {
         return grid[x][y];
     }
 
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public Tetromino getCurrentPiece() {
+        return currentPiece;
+    }
+
     public Tetromino.Shape getNextPiece() {
         if (bag.size() < 1) generateNewPiece();
         return bag.get(0);
+    }
+
+    public int getScore() {
+        return score;
     }
 }
