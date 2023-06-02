@@ -9,6 +9,7 @@ public class Board {
     private final ArrayList<Tetromino.Shape> bag; // Contains the Next pieces
     private final Tetromino.Shape[][] grid; // Static Blocks location (For collision and rendering)
 
+    private Tetromino.Shape heldPiece;
     private Tetromino currentPiece;
     private GameState gameState;
     private int score;
@@ -66,6 +67,15 @@ public class Board {
             currentPiece.setCurrentPosition(xPos, yPos);
 
         else gameState = GameState.Stopped;
+    }
+
+    public void holdCurrentPiece() {
+        if (heldPiece != null) return;
+        heldPiece = currentPiece.getShape();
+    }
+
+    public void releaseHeldPiece() {
+        if (heldPiece == null) return;
     }
 
     /** Remove Full rows */

@@ -14,6 +14,7 @@ public class PlayAreaPanel extends JPanel {
     public Board board;
 
     private double guiScale;
+    private int highestScore = 0;
     private int screenHeight;
     private int screenWidth;
     private int blockSize;
@@ -43,12 +44,11 @@ public class PlayAreaPanel extends JPanel {
                      key == KeyEvent.VK_F1))
                     board.pause();
 
-
                 // Movement Key Bindings
                 if (gameState == Board.GameState.Playing)
                     switch (key) {
-                        case KeyEvent.VK_UP, KeyEvent.VK_X   -> board.rotatePieceClockWise();
-                        case KeyEvent.VK_DOWN, KeyEvent.VK_Z -> board.rotatePieceCounterClockwise();
+                        case KeyEvent.VK_UP, KeyEvent.VK_Z   -> board.rotatePieceClockWise();
+                        case KeyEvent.VK_DOWN, KeyEvent.VK_X -> board.rotatePieceCounterClockwise();
                         case KeyEvent.VK_LEFT  -> board.movePieceLeft();
                         case KeyEvent.VK_RIGHT -> board.movePieceRight();
                         case KeyEvent.VK_D     -> board.movePieceDown(true);
@@ -72,7 +72,7 @@ public class PlayAreaPanel extends JPanel {
         );
 
         // Tetris Game Loop
-        timer = new Timer(300, e -> {
+        timer = new Timer(200, e -> {
             if (board.getGameState() != Board.GameState.Playing) return;
             board.movePieceDown(false);
             repaint();
@@ -103,12 +103,20 @@ public class PlayAreaPanel extends JPanel {
 
         // Draw Game-Over Screen
         if (board.getGameState() == Board.GameState.Stopped) {
+            highestScore = Math.max(highestScore, board.getScore());
+
             utils.drawInterruptPage("GAME OVER", "Press Enter to Try Again.");
+            utils.drawCenteredText(
+                "Highest Score: " + highestScore,
+                utils.PLAIN_FONT,
+                screenHeight / 2 + utils.HEADER_FONT.getSize() +
+                utils.PLAIN_FONT.getSize() + 15
+            );
             utils.drawCenteredText(
                 "Score: " + board.getScore(),
                 utils.PLAIN_FONT,
                 screenHeight / 2 + utils.HEADER_FONT.getSize() +
-                utils.PLAIN_FONT.getSize() + 15
+                utils.PLAIN_FONT.getSize() * 2 + 15
             );
             return;
         }
