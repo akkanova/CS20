@@ -11,13 +11,15 @@ import java.awt.*;
 public class Tetromino {
     private final Shape shape;
 
-    // The x and y offsets of each block of a tetromino
-    // (4 blocks in total), for rotation calculation
-    private Point[] blocksOffsets;
-
     // The x and y location of this piece
     // relative to the grid
-    private Point currentPosition;
+    private final Point currentPosition;
+
+    // The x and y offsets of each block of a tetromino
+    // (4 blocks in total) relative to `currentPosition`,
+    // used for rotation calculation
+    private Point[] blocksOffsets;
+
 
     /**
      * The Distinct shapes of Tetrominoes.
@@ -103,6 +105,13 @@ public class Tetromino {
         return newOffset;
     }
 
+    /** Creates an exact duplicate of this */
+    public Tetromino duplicate() {
+        Tetromino copy = new Tetromino(shape);
+        copy.setCurrentPosition(currentPosition.x, currentPosition.y);
+        copy.setBlocksOffsets(blocksOffsets);
+        return copy;
+    }
 
     // Setters
 

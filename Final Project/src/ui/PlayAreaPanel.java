@@ -17,6 +17,7 @@ public class PlayAreaPanel extends JPanel {
     private int screenHeight;
     private int screenWidth;
     private int blockSize;
+    private Timer timer;
 
     public PlayAreaPanel() {
         // Use double buffered, which uses additional memory
@@ -50,7 +51,9 @@ public class PlayAreaPanel extends JPanel {
                         case KeyEvent.VK_DOWN, KeyEvent.VK_Z -> board.rotatePieceCounterClockwise();
                         case KeyEvent.VK_LEFT  -> board.movePieceLeft();
                         case KeyEvent.VK_RIGHT -> board.movePieceRight();
-                        case KeyEvent.VK_SPACE -> board.movePieceDown(true);
+                        case KeyEvent.VK_D     -> board.movePieceDown(true);
+                        case KeyEvent.VK_SPACE -> board.dropPiece();
+                        case KeyEvent.VK_F4    -> restart();
                     }
 
                 repaint();
@@ -64,15 +67,25 @@ public class PlayAreaPanel extends JPanel {
         screenHeight = height;
         screenWidth = width;
         board = new Board(
-            GameWindow.BLOCKS_WIDTH - 7,
+            GameWindow.BLOCKS_WIDTH - 6,
             GameWindow.BLOCKS_HEIGHT - 2
         );
 
+        // Tetris Game Loop
+        timer = new Timer(300, e -> {
+            if (board.getGameState() != Board.GameState.Playing) return;
+            board.movePieceDown(false);
+            repaint();
+        });
+
         this.guiScale = guiScale;
+        this.timer.start();
         repaint();
     }
 
     public void restart() {
+        timer.stop();
+        timer = null;
         start(screenWidth, screenHeight, guiScale);
     }
 
@@ -139,14 +152,44 @@ public class PlayAreaPanel extends JPanel {
             }
         }
 
+        // Draw Current Tetromino Piece's Shadow
+        drawTetromino(g, board.getCurrentPieceShadow(), "Shadow");
+
         // Draw Current Tetromino Piece
         Tetromino currentPiece = board.getCurrentPiece();
-        for (Point block : currentPiece.getBlockCoordinates()) {
+        drawTetromino(g, currentPiece, currentPiece.getShape().name());
+
+        // Draw Score & Other Text
+        int sidePanelXOffset = columns - 4;
+        int sidePanelXPos = (int) (blockSize * (sidePanelXOffset + 0.5));
+        Font sidePanelFont = new Font("Monocraft", Font.PLAIN, (int) (10 * guiScale));
+
+        g.setFont(sidePanelFont);
+        g.drawString("Score", sidePanelXPos, blockSize + sidePanelFont.getSize());
+        g.drawString(Integer.toString(board.getScore()), sidePanelXPos, blockSize + sidePanelFont.getSize() * 2);
+        g.drawString("Next", sidePanelXPos, blockSize + sidePanelFont.getSize() * 5);
+
+        // Draw Next Pieces
+        Tetromino.Shape[] nextShapes = board.getNextPieces();
+
+        for (int pieceIndex = 0; pieceIndex < 4; pieceIndex++) {
+            Tetromino.Shape nextShape = nextShapes[pieceIndex];
+            Tetromino nextPiece = new Tetromino(nextShape);
+
+            nextPiece.setCurrentPosition(sidePanelXOffset, 4 * (pieceIndex + 1));
+            drawTetromino(g, nextPiece, nextShape.name());
+        }
+
+        g.dispose();
+    }
+
+    private void drawTetromino(Graphics2D g, Tetromino tetromino, String texture) {
+        for (Point block : tetromino.getBlockCoordinates()) {
             int xPos = (block.x + 1) * blockSize;
             int yPos = (block.y + 1) * blockSize;
 
             g.drawImage(
-                ResourceManager.loadBlockTexture(currentPiece.getShape().name()),
+                ResourceManager.loadBlockTexture(texture),
                 xPos, yPos, blockSize, blockSize, null
             );
         }

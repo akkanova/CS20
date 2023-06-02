@@ -12,7 +12,7 @@ public class GameWindow extends JFrame {
     public final MenuPanel menuPanel;
 
     public static final int BLOCKS_HEIGHT = 24;
-    public static final int BLOCKS_WIDTH = 17;
+    public static final int BLOCKS_WIDTH = 16;
     // Dictates the size of the UI while retaining UI component size ratios
     public double guiScale;
 

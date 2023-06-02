@@ -3,11 +3,10 @@ package game;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.function.Consumer;
 
 /** Board holding tetrominoes and main game logic */
 public class Board {
-    private final ArrayList<Tetromino.Shape> bag; // Next pieces
+    private final ArrayList<Tetromino.Shape> bag; // Contains the Next pieces
     private final Tetromino.Shape[][] grid; // Static Blocks location (For collision and rendering)
 
     private Tetromino currentPiece;
@@ -42,20 +41,25 @@ public class Board {
     }
 
     public void generateNewPiece() {
-        if (bag.isEmpty()) {
+        // Keep the bag full
+        if (bag.size() < 5) {
+            ArrayList<Tetromino.Shape> shapes = new ArrayList<>();
             // The bag should contain all possible shapes
+            Collections.addAll(shapes, Tetromino.Shape.values());
             // With a completely random sequence they appear in.
-            Collections.addAll(bag, Tetromino.Shape.values());
-            Collections.shuffle(bag);
+            Collections.shuffle(shapes);
+            Collections.addAll(bag, shapes.toArray(Tetromino.Shape[]::new));
         }
 
+        // Replace the currentPiece with a new one
+        currentPiece = null;
         currentPiece = new Tetromino(bag.get(0));
         bag.remove(0);
 
-        int yPos = 2;
+        int yPos = 1;
         int xPos = boardWidth / 2;
-        Point[] initialPosition = currentPiece.translate(xPos, yPos);
 
+        Point[] initialPosition = currentPiece.translate(xPos, yPos);
         // If It can't put the tetromino in the initial position it
         // usually means Game Over.
         if (!doesCollide(initialPosition))
@@ -66,27 +70,27 @@ public class Board {
 
     /** Remove Full rows */
     public void cleanupRows() {
-        Consumer<Integer> collapseRow = (Integer rowIndex) -> {
-            // Going up the grid to move everything down;
-            for (int row = rowIndex - 1; row > 0; row--) {
-                System.arraycopy(grid[row], 0, grid[row + 1], 0, boardWidth);
-            }
-        };
-
+        ArrayList<Integer> rowsToClear = new ArrayList<>();
         for (int row = boardHeight - 1; row > 0; row--) {
             // Count how many columns of that row is filled
             int colFilled = 0;
             for (Tetromino.Shape col : grid[row])
                 if (col != null) colFilled++;
 
-            // If the Row is full collapse all the row above it
-            if (colFilled >= boardWidth) {
+            // If the Row is full add it to the rowsToClear queue
+            if (colFilled >= boardWidth)
+                rowsToClear.add(row);
+        }
 
-                // To do make a queue of rows to clear, and do that instead;
+        // Starting from the top-most full row
+        Collections.reverse(rowsToClear);
+        for (int fullRowIndex : rowsToClear) {
+            score += 100 + (50 * rowsToClear.size());
 
-                collapseRow.accept(row);
-                score += 100;
-            }
+            // Go up from the full row and move all the subsequent row down,
+            // Which will overwrite the full row.
+            for (int row = fullRowIndex - 1; row > 0; row--)
+                System.arraycopy(grid[row], 0, grid[row + 1], 0, boardWidth);
         }
     }
 
@@ -95,7 +99,6 @@ public class Board {
         for (Point block : currentPiece.getBlockCoordinates())
             grid[block.y][block.x] = currentPiece.getShape();
 
-        currentPiece = null;
         cleanupRows();
         generateNewPiece();
     }
@@ -118,31 +121,41 @@ public class Board {
 
     // Movement
 
+    public void dropPiece() {
+        // Keep Dropping the Piece
+        // until it collides with something
+        while (true)
+            if (movePiece(currentPiece, 0, 1, true)) break;
+    }
+
     /**
      * If forced is true, the invocation of the function is considered a
      * user input and a point is added to the user's score.
      * */
-    public void movePieceDown(boolean forced) { movePiece(0, 1, forced); }
-    public void movePieceRight() { movePiece(1, 0, false); }
-    public void movePieceLeft() { movePiece(-1, 0, false); }
+    public void movePieceDown(boolean forced) { movePiece(currentPiece, 0, 1, forced); }
+    public void movePieceRight() { movePiece(currentPiece, 1, 0, false); }
+    public void movePieceLeft() { movePiece(currentPiece, -1, 0, false); }
 
-    /** Returns true if the move was successful */
-    private void movePiece(int deltaX, int deltaY, boolean addScore) {
-        Point[] newCoordinates = currentPiece.translate(deltaX, deltaY);
-        Point currentPosition = currentPiece.getCurrentPosition();
-
+    /** Returns true if it collided with something */
+    private boolean movePiece(Tetromino target, int deltaX, int deltaY, boolean addScore) {
+        Point[] newCoordinates = target.translate(deltaX, deltaY);
         boolean doesCollideWithGrid = doesCollide(newCoordinates);
 
-        if (!doesCollideWithGrid)
-            currentPiece.setCurrentPosition(
+        if (!doesCollideWithGrid) {
+            if (addScore) score += 1;
+            Point currentPosition = target.getCurrentPosition();
+            target.setCurrentPosition(
                 currentPosition.x + deltaX,
                 currentPosition.y + deltaY
             );
-
-        if (doesCollideWithGrid && deltaY > 0) {
-            attachCurrentPieceToGrid();
-            if (addScore) score += 1;
         }
+
+        // If the provided tetromino is the current piece and not the
+        // Shadow tetromino attach it to the static block grid.
+        if (target.equals(currentPiece) && doesCollideWithGrid && deltaY > 0)
+            attachCurrentPieceToGrid();
+
+        return doesCollideWithGrid;
     }
 
     public void rotatePieceCounterClockwise() { rotatePiece(-1, 1); }
@@ -168,6 +181,10 @@ public class Board {
         return grid[y][x];
     }
 
+    public Tetromino.Shape[] getNextPieces() {
+        return bag.toArray(Tetromino.Shape[]::new);
+    }
+
     public GameState getGameState() {
         return gameState;
     }
@@ -176,9 +193,14 @@ public class Board {
         return currentPiece;
     }
 
-    public Tetromino.Shape getNextPiece() {
-        if (bag.size() < 1) generateNewPiece();
-        return bag.get(0);
+    /** Shadow refers to the predicted landing place of the currentPiece */
+    public Tetromino getCurrentPieceShadow() {
+        Tetromino shadow = currentPiece.duplicate();
+        // Move it to the very bottom
+        while (true)
+            if (movePiece(shadow, 0, 1, false)) break;
+
+        return shadow;
     }
 
     public int getScore() {
