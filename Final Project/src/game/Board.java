@@ -188,20 +188,37 @@ public class Board {
         return doesCollideWithGrid;
     }
 
-    public void rotatePieceCounterClockwise() { rotatePiece(-1, 1); }
-    public void rotatePieceClockWise() { rotatePiece(1, -1); }
+    public void rotatePieceCounterClockwise() { rotatePiece(false); }
+    public void rotatePieceClockWise() { rotatePiece(true); }
 
-    private void rotatePiece(int xDirection, int yDirection) {
+    private void rotatePiece(boolean clockwise) {
         if (currentPiece == null) return;
         // Rotation doesn't make sense for a square.
         if (currentPiece.getShape() == Tetromino.Shape.Square) return;
 
         Point currentPosition = currentPiece.getCurrentPosition();
-        Point[] newOffsets = currentPiece.rotate(xDirection, yDirection);
+        Point[] newOffsets = currentPiece.rotate(clockwise);
         Point[] newCoordinates = Tetromino.addOffsetsAndPosition(newOffsets, currentPosition);
 
         if (!doesCollide(newCoordinates))
             currentPiece.setBlocksOffsets(newOffsets);
+
+        // If it does collide with something try doing a Wall Kick
+        else {
+            // Try moving Left
+            currentPosition.x += 1;
+            newCoordinates = Tetromino.addOffsetsAndPosition(newOffsets, currentPosition);
+            if (!doesCollide(newCoordinates)) {
+                currentPiece.setBlocksOffsets(newOffsets);
+                return;
+            }
+
+            // Try moving Right
+            currentPosition.x -= 2;
+            newCoordinates = Tetromino.addOffsetsAndPosition(newOffsets, currentPosition);
+            if (!doesCollide(newCoordinates))
+                currentPiece.setBlocksOffsets(newOffsets);
+        }
     }
 
 

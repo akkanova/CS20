@@ -93,6 +93,10 @@ public class Tetromino {
      * we don't multiply the new value of Y with a negative, instead we do it for
      * the new value of X instead.
      */
+    public Point[] rotate(boolean clockwise) {
+        return clockwise ? rotate(-1, 1) : rotate(1, -1);
+    }
+
     public Point[] rotate(int xDirection, int yDirection) {
         Point[] oldOffset = blocksOffsets;
         Point[] newOffset = getEmptyPointArray();
