@@ -27,6 +27,7 @@ public class PlayAreaPanel extends JPanel {
         setFocusable(true); // A component needs to be focusable to use a KeyListener
         highestScore = ResourceManager.loadPreviousHighestScore();
 
+        // Listen for keyboard presses when this panel is focused
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -39,6 +40,8 @@ public class PlayAreaPanel extends JPanel {
                     restart();
                     return;
                 }
+
+                // GameState Based Key Bindings
 
                 if (gameState == Board.GameState.Stopped &&
                     key == KeyEvent.VK_ENTER) {
@@ -80,7 +83,7 @@ public class PlayAreaPanel extends JPanel {
         );
 
         this.guiScale = guiScale;
-        this.timer = new Timer(300, e -> {
+        this.timer = new Timer(350, e -> {
             // Game loop
             if (board.getGameState() != Board.GameState.Playing)
                 return;
@@ -164,11 +167,11 @@ public class PlayAreaPanel extends JPanel {
 
                 // Draw the Tetromino block
                 } else if ((row <= board.boardHeight) && (col <= board.boardWidth)) {
-                   Tetromino.Shape shape =
-                       board.getBlockShapeAt(col - 1, row - 1);
+                   Tetromino.Type type =
+                       board.getBlockTypeAt(col - 1, row - 1);
 
-                   if (shape != null) g.drawImage(
-                        ResourceManager.loadBlockTexture(shape.name()),
+                   if (type != null) g.drawImage(
+                        ResourceManager.loadBlockTexture(type.name()),
                         xPos, yPos, blockSize, blockSize, null
                    );
                 }
@@ -180,7 +183,7 @@ public class PlayAreaPanel extends JPanel {
 
         // Draw Current Tetromino Piece
         Tetromino currentPiece = board.getCurrentPiece();
-        drawTetromino(g, currentPiece, currentPiece.getShape().name());
+        drawTetromino(g, currentPiece, currentPiece.getType().name());
 
         // Draw Score & Other Text
         int sidePanelXOffset = columns - 4;
@@ -194,22 +197,22 @@ public class PlayAreaPanel extends JPanel {
         g.drawString("Next", sidePanelXPos, blockSize + sidePanelFont.getSize() * 15);
 
         // Draw Held Piece
-        Tetromino.Shape heldPieceShape = board.getHeldPiece();
-        if (heldPieceShape != null) {
-            Tetromino heldPiece = new Tetromino(heldPieceShape);
+        Tetromino.Type heldPieceType = board.getHeldPieceType();
+        if (heldPieceType != null) {
+            Tetromino heldPiece = new Tetromino(heldPieceType);
             heldPiece.setCurrentPosition(sidePanelXOffset, 4);
-            drawTetromino(g, heldPiece, heldPieceShape.name());
+            drawTetromino(g, heldPiece, heldPieceType.name());
         }
 
         // Draw Next Pieces
-        Tetromino.Shape[] nextShapes = board.getNextPieces();
+        Tetromino.Type[] nextTypes = board.getNextPieces();
 
         for (int pieceIndex = 0; pieceIndex < 3; pieceIndex++) {
-            Tetromino.Shape nextShape = nextShapes[pieceIndex];
-            Tetromino nextPiece = new Tetromino(nextShape);
+            Tetromino.Type nextType = nextTypes[pieceIndex];
+            Tetromino nextPiece = new Tetromino(nextType);
 
             nextPiece.setCurrentPosition(sidePanelXOffset, 4 * pieceIndex + 9);
-            drawTetromino(g, nextPiece, nextShape.name());
+            drawTetromino(g, nextPiece, nextType.name());
         }
 
         g.dispose();

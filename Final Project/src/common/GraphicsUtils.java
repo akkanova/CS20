@@ -2,8 +2,12 @@ package common;
 
 import java.awt.*;
 
-/** Wraps around Graphics2D and provides common tools for rendering */
+/**
+ * Wraps around Graphics2D and provides common tools for rendering.
+ * Mainly used by the ui Panels.
+ * */
 public class GraphicsUtils {
+    // Constants may change based on guiScale
     public final Color FG_TEXT_COLOR = new Color(187, 187, 187); // Foreground Color
     public final Color BG_COLOR = new Color(54, 57, 63); // Background Color
     public final Font SUB_HEADER_FONT;
@@ -24,11 +28,18 @@ public class GraphicsUtils {
         this.graphics = g;
     }
 
+    // Basically Just Almost Self-Contained Code Snippets.
+
+    /** Fills the entire screen with the BG_COLOR */
     public void drawBackground() {
         graphics.setColor(BG_COLOR);
         graphics.fillRect(0, 0, screenWidth, screenHeight);
     }
 
+    /**
+     * Draws centered text, by using FontMetrics to get the exact
+     * middle pixel position of the Font.
+     * */
     public void drawCenteredText(String text, Font font, int yPos) {
         FontMetrics metrics = graphics.getFontMetrics(font);
         int xPos = (screenWidth - metrics.stringWidth(text)) / 2;

@@ -5,20 +5,36 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
-/** A static methods class that loads the images and other files required */
+/**
+ * A static methods class that loads the images and other files required.
+ * Kind of like a File Manager.
+ * */
 public class ResourceManager {
-    private static final String baseDir = "res/"; // Base Files Directory
+    private static final String baseDir = "res/"; // Base Resource Files Directory (Prefix)
     private static final String highestScoreFile = baseDir + "highest-score";
     private static String texturePack;
 
-    public static void setTexturePack(String pack) {
-        texturePack = pack;
+    /**
+     * `Texture pack` refers to the folder location within
+     * the baseDir of the 20px by 20px texture blocks used by
+     * PlayAreaPanel
+     * */
+    public static void setTexturePack(String texturePack) {
+        ResourceManager.texturePack = texturePack;
     }
 
+    /**
+     * Like loadImage but automatically prefixes the texture pack
+     * directory and suffixes the image file extension (.png)
+     * */
     public static BufferedImage loadBlockTexture(String block) {
         return loadImage(texturePack + "/" + block + ".png");
     }
 
+    /**
+     * Does Exception handling and baseDir prefixing for
+     * importing images located within the baseDir
+     * */
     public static BufferedImage loadImage(String filename) {
         String fullPath = baseDir + filename;
         try {
@@ -72,7 +88,7 @@ public class ResourceManager {
         }
     }
 
-    /** Saves the highest score under file `highest-score` */
+    /** Saves the highest score under the file location of `res/highest-score` */
     public static void saveHighestScore(int highestScore) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(highestScoreFile))) {
             writer.write(Integer.toString(highestScore));

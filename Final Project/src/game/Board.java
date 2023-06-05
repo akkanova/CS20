@@ -6,10 +6,10 @@ import java.util.Collections;
 
 /** Board holding tetrominoes and main game logic */
 public class Board {
-    private final ArrayList<Tetromino.Shape> bag; // Contains the Next pieces
-    private final Tetromino.Shape[][] grid; // Static Blocks location (For collision and rendering)
+    private final ArrayList<Tetromino.Type> bag; // Contains the Next pieces
+    private final Tetromino.Type[][] grid; // Static Blocks location (For collision and rendering)
 
-    private Tetromino.Shape heldPiece;
+    private Tetromino.Type heldPiece;
     private Tetromino currentPiece;
     private GameState gameState;
     private boolean heldPieceLock; // You can only switch with the held piece once per block.
@@ -30,7 +30,7 @@ public class Board {
         boardWidth = width;
         score = 0;
 
-        grid = new Tetromino.Shape[height][width];
+        grid = new Tetromino.Type[height][width];
         bag = new ArrayList<>();
         generateNewPiece();
     }
@@ -45,17 +45,17 @@ public class Board {
     public void generateNewPiece() {
         // Keep the bag full
         if (bag.size() < 5) {
-            // List out all possible Tetromino shapes
-            ArrayList<Tetromino.Shape> allShapes = new ArrayList<>();
-            Collections.addAll(allShapes, Tetromino.Shape.values());
-            // The bag should contain all possible shapes
+            // List out all possible Tetromino types
+            ArrayList<Tetromino.Type> allTypes = new ArrayList<>();
+            Collections.addAll(allTypes, Tetromino.Type.values());
+            // The bag should contain all possible types
             // With a completely random sequence they appear in.
-            Collections.shuffle(allShapes);
-            Collections.addAll(bag, allShapes.toArray(Tetromino.Shape[]::new));
+            Collections.shuffle(allTypes);
+            Collections.addAll(bag, allTypes.toArray(Tetromino.Type[]::new));
         }
 
-        // Replace the currentPiece with a new shape from the bag
-        initializeWithPiece(bag.get(0));
+        // Replace the currentPiece with a new type from the bag
+        initializeWithType(bag.get(0));
         bag.remove(0);
     }
 
@@ -65,23 +65,23 @@ public class Board {
         if (heldPieceLock) return;
         heldPieceLock = true;
 
-        Tetromino.Shape currentPieceShape = currentPiece.getShape();
+        Tetromino.Type currentPieceType = currentPiece.getType();
         if (heldPiece == null) {
             // At the start of the game heldPiece is null
             // so, we can't really switch it with the currentPiece.
-            heldPiece = currentPieceShape;
+            heldPiece = currentPieceType;
             generateNewPiece();
             return;
         }
 
-        initializeWithPiece(heldPiece);
-        heldPiece = currentPieceShape;
+        initializeWithType(heldPiece);
+        heldPiece = currentPieceType;
     }
     
-    /** Initialize the currentPiece with a new Shape */
-    private void initializeWithPiece(Tetromino.Shape shape) {
+    /** Initialize the currentPiece with a new Type */
+    private void initializeWithType(Tetromino.Type type) {
         currentPiece = null;
-        currentPiece = new Tetromino(shape);
+        currentPiece = new Tetromino(type);
 
         int yPos = 1;
         int xPos = boardWidth / 2;
@@ -101,7 +101,7 @@ public class Board {
         for (int row = boardHeight - 1; row > 0; row--) {
             // Count how many columns of that row is filled
             int colFilled = 0;
-            for (Tetromino.Shape col : grid[row])
+            for (Tetromino.Type col : grid[row])
                 if (col != null) colFilled++;
 
             // If the Row is full add it to the rowsToClear queue
@@ -178,7 +178,7 @@ public class Board {
         if (target.equals(currentPiece) && doesCollideWithGrid && deltaY > 0) {
             // Convert the current piece blocks into a static block within the grid
             for (Point block : target.getBlockCoordinates())
-                grid[block.y][block.x] = currentPiece.getShape();
+                grid[block.y][block.x] = currentPiece.getType();
             
             cleanupRows();
             generateNewPiece();
@@ -194,7 +194,7 @@ public class Board {
     private void rotatePiece(boolean clockwise) {
         if (currentPiece == null) return;
         // Rotation doesn't make sense for a square.
-        if (currentPiece.getShape() == Tetromino.Shape.Square) return;
+        if (currentPiece.getType() == Tetromino.Type.Square) return;
 
         Point currentPosition = currentPiece.getCurrentPosition();
         Point[] newOffsets = currentPiece.rotate(clockwise);
@@ -224,16 +224,16 @@ public class Board {
 
     // Getters
     
-    public Tetromino.Shape getHeldPiece() {
+    public Tetromino.Type getHeldPieceType() {
         return heldPiece;
     }
 
-    public Tetromino.Shape getBlockShapeAt(int x, int y) {
+    public Tetromino.Type getBlockTypeAt(int x, int y) {
         return grid[y][x];
     }
 
-    public Tetromino.Shape[] getNextPieces() {
-        return bag.toArray(Tetromino.Shape[]::new);
+    public Tetromino.Type[] getNextPieces() {
+        return bag.toArray(Tetromino.Type[]::new);
     }
 
     public GameState getGameState() {

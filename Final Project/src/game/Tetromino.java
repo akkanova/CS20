@@ -6,10 +6,11 @@ import java.awt.*;
  * <a href="https://en.wikipedia.org/wiki/Tetromino">
  * Tetromino Definition
  * </a>
- * P.S most Java IDEs support HTML notations (including IntelliJ)
+ * P.S most Java IDEs support HTML notations (including IntelliJ) <br>
+ * T
  * */
 public class Tetromino {
-    private final Shape shape;
+    private final Type type;
 
     // The x and y location of this piece
     // relative to the grid
@@ -27,7 +28,7 @@ public class Tetromino {
      *     More Info
      * </a>
      */
-    public enum Shape {
+    public enum Type {
         Straight, // Line
         Square, // Cube
         TShape,
@@ -37,15 +38,15 @@ public class Tetromino {
         ZSkew // Stairs going up to the left (mirror of S)
     }
 
-    public Tetromino(Shape shape) {
-        this.shape = shape;
+    public Tetromino(Type type) {
+        this.type = type;
         this.currentPosition = new Point();
-        this.blocksOffsets = getBlockOffsets(shape);
+        this.blocksOffsets = getBlockOffsets(type);
     }
 
     /** get initial block offsets based on Tetromino shape */
-    public static Point[] getBlockOffsets(Shape shape) {
-        return switch (shape) {
+    public static Point[] getBlockOffsets(Type type) {
+        return switch (type) {
             // I suggest visualizing the points in https://www.desmos.com/calculator, for it to make some sense
             case Straight -> new Point[] { new Point(0,  -1), new Point(0,  0), new Point(0,  1), new Point(0,  2) }; // Vertical Line
             case Square   -> new Point[] { new Point(0,   0), new Point(1,  0), new Point(0,  1), new Point(1,  1) }; // Cube
@@ -84,8 +85,10 @@ public class Tetromino {
     }
 
     /**
-     * Explanation for how this all works:
-     * (Visualize in Desmos for more clarity)
+     * @return new offsets of this Tetromino blocks
+     * <br> <br>
+     * Explanation for how this function works: <br>
+     * (Visualize in Desmos for more clarity) <br>
      * Take for example point { -5, -5 } to rotate it right (Clockwise),
      * we set the new value of X to the value of it's Y. So now it's { -5, _ }.
      * Then we set the new value of Y to the value it's old X times negative.
@@ -94,12 +97,11 @@ public class Tetromino {
      * the new value of X instead.
      */
     public Point[] rotate(boolean clockwise) {
-        return clockwise ? rotate(-1, 1) : rotate(1, -1);
-    }
-
-    public Point[] rotate(int xDirection, int yDirection) {
         Point[] oldOffset = blocksOffsets;
         Point[] newOffset = getEmptyPointArray();
+
+        int xDirection = clockwise ? -1 :  1;
+        int yDirection = clockwise ?  1 : -1;
 
         for (int blockIndex = 0; blockIndex < 4; blockIndex++) {
             newOffset[blockIndex].x = oldOffset[blockIndex].y * xDirection;
@@ -111,7 +113,7 @@ public class Tetromino {
 
     /** Creates an exact duplicate of this */
     public Tetromino duplicate() {
-        Tetromino copy = new Tetromino(shape);
+        Tetromino copy = new Tetromino(type);
         copy.setCurrentPosition(currentPosition.x, currentPosition.y);
         copy.setBlocksOffsets(blocksOffsets);
         return copy;
@@ -139,7 +141,7 @@ public class Tetromino {
         return currentPosition;
     }
 
-    public Tetromino.Shape getShape() {
-        return shape;
+    public Type getType() {
+        return type;
     }
 }
