@@ -14,7 +14,7 @@ public class PlayAreaPanel extends JPanel {
     public Board board;
 
     private double guiScale;
-    private int highestScore = 0;
+    private int highestScore;
     private int screenHeight;
     private int screenWidth;
     private int blockSize;
@@ -25,12 +25,20 @@ public class PlayAreaPanel extends JPanel {
         // space to achieve fast, flicker-free updates
         super(true);
         setFocusable(true); // A component needs to be focusable to use a KeyListener
+        highestScore = ResourceManager.loadPreviousHighestScore();
 
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 Board.GameState gameState = board.getGameState();
                 int key = e.getKeyCode();
+
+                // Whatever the gameState is, the user should
+                // be allowed to forcibly restart the game
+                if (key == KeyEvent.VK_F4) {
+                    restart();
+                    return;
+                }
 
                 if (gameState == Board.GameState.Stopped &&
                     key == KeyEvent.VK_ENTER) {
@@ -47,13 +55,13 @@ public class PlayAreaPanel extends JPanel {
                 // Movement Key Bindings
                 if (gameState == Board.GameState.Playing)
                     switch (key) {
-                        case KeyEvent.VK_UP, KeyEvent.VK_Z   -> board.rotatePieceClockWise();
-                        case KeyEvent.VK_DOWN, KeyEvent.VK_X -> board.rotatePieceCounterClockwise();
-                        case KeyEvent.VK_LEFT  -> board.movePieceLeft();
+                        case KeyEvent.VK_UP, KeyEvent.VK_Z -> board.rotatePieceClockWise();
+                        case KeyEvent.VK_X     -> board.rotatePieceCounterClockwise();
+                        case KeyEvent.VK_C     -> board.switchWithHeldPiece();
+                        case KeyEvent.VK_DOWN  -> board.movePieceDown(true);
                         case KeyEvent.VK_RIGHT -> board.movePieceRight();
-                        case KeyEvent.VK_D     -> board.movePieceDown(true);
+                        case KeyEvent.VK_LEFT  -> board.movePieceLeft();
                         case KeyEvent.VK_SPACE -> board.dropPiece();
-                        case KeyEvent.VK_F4    -> restart();
                     }
 
                 repaint();
@@ -71,15 +79,18 @@ public class PlayAreaPanel extends JPanel {
             GameWindow.BLOCKS_HEIGHT - 2
         );
 
-        // Tetris Game Loop
-        timer = new Timer(200, e -> {
-            if (board.getGameState() != Board.GameState.Playing) return;
+        this.guiScale = guiScale;
+        this.timer = new Timer(300, e -> {
+            // Game loop
+            if (board.getGameState() != Board.GameState.Playing)
+                return;
+
+            // Just move the current piece by one block down.
             board.movePieceDown(false);
-            repaint();
+            repaint(); // Call Java Swing UI repaint.
         });
 
-        this.guiScale = guiScale;
-        this.timer.start();
+        timer.start();
         repaint();
     }
 
@@ -103,7 +114,11 @@ public class PlayAreaPanel extends JPanel {
 
         // Draw Game-Over Screen
         if (board.getGameState() == Board.GameState.Stopped) {
-            highestScore = Math.max(highestScore, board.getScore());
+            int score = board.getScore();
+            if (score > highestScore) {
+                highestScore = score;
+                ResourceManager.saveHighestScore(score);
+            }
 
             utils.drawInterruptPage("GAME OVER", "Press Enter to Try Again.");
             utils.drawCenteredText(
@@ -113,7 +128,7 @@ public class PlayAreaPanel extends JPanel {
                 utils.PLAIN_FONT.getSize() + 15
             );
             utils.drawCenteredText(
-                "Score: " + board.getScore(),
+                "Score: " + score,
                 utils.PLAIN_FONT,
                 screenHeight / 2 + utils.HEADER_FONT.getSize() +
                 utils.PLAIN_FONT.getSize() * 2 + 15
@@ -150,7 +165,7 @@ public class PlayAreaPanel extends JPanel {
                 // Draw the Tetromino block
                 } else if ((row <= board.boardHeight) && (col <= board.boardWidth)) {
                    Tetromino.Shape shape =
-                       board.getBlock(col - 1, row - 1);
+                       board.getBlockShapeAt(col - 1, row - 1);
 
                    if (shape != null) g.drawImage(
                         ResourceManager.loadBlockTexture(shape.name()),
@@ -175,16 +190,25 @@ public class PlayAreaPanel extends JPanel {
         g.setFont(sidePanelFont);
         g.drawString("Score", sidePanelXPos, blockSize + sidePanelFont.getSize());
         g.drawString(Integer.toString(board.getScore()), sidePanelXPos, blockSize + sidePanelFont.getSize() * 2);
-        g.drawString("Next", sidePanelXPos, blockSize + sidePanelFont.getSize() * 5);
+        g.drawString("Hold", sidePanelXPos, blockSize + sidePanelFont.getSize() * 5);
+        g.drawString("Next", sidePanelXPos, blockSize + sidePanelFont.getSize() * 15);
+
+        // Draw Held Piece
+        Tetromino.Shape heldPieceShape = board.getHeldPiece();
+        if (heldPieceShape != null) {
+            Tetromino heldPiece = new Tetromino(heldPieceShape);
+            heldPiece.setCurrentPosition(sidePanelXOffset, 4);
+            drawTetromino(g, heldPiece, heldPieceShape.name());
+        }
 
         // Draw Next Pieces
         Tetromino.Shape[] nextShapes = board.getNextPieces();
 
-        for (int pieceIndex = 0; pieceIndex < 4; pieceIndex++) {
+        for (int pieceIndex = 0; pieceIndex < 3; pieceIndex++) {
             Tetromino.Shape nextShape = nextShapes[pieceIndex];
             Tetromino nextPiece = new Tetromino(nextShape);
 
-            nextPiece.setCurrentPosition(sidePanelXOffset, 4 * (pieceIndex + 1));
+            nextPiece.setCurrentPosition(sidePanelXOffset, 4 * pieceIndex + 9);
             drawTetromino(g, nextPiece, nextShape.name());
         }
 

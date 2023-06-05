@@ -12,7 +12,7 @@ public class Main {
             // Load all the initial resources first.
             ResourceManager.loadFont("Monocraft");
             ResourceManager.setTexturePack("default");
-            new GameWindow();
+            new GameWindow(2);
         });
     }
 }

@@ -61,7 +61,7 @@ public class Tetromino {
         return new Point[] { new Point(), new Point(), new Point(), new Point() };
     }
 
-    /** Equally add the value of a Point to an array of Points */
+    /** Equally add the x & y value of a Point to an array of Points */
     public static Point[] addOffsetsAndPosition(Point[] offsets, Point position) {
         Point[] coordinates = getEmptyPointArray();
 

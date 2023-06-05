@@ -12,6 +12,7 @@ public class Board {
     private Tetromino.Shape heldPiece;
     private Tetromino currentPiece;
     private GameState gameState;
+    private boolean heldPieceLock; // You can only switch with the held piece once per block.
     private int score;
 
     public final int boardWidth;
@@ -44,18 +45,43 @@ public class Board {
     public void generateNewPiece() {
         // Keep the bag full
         if (bag.size() < 5) {
-            ArrayList<Tetromino.Shape> shapes = new ArrayList<>();
+            // List out all possible Tetromino shapes
+            ArrayList<Tetromino.Shape> allShapes = new ArrayList<>();
+            Collections.addAll(allShapes, Tetromino.Shape.values());
             // The bag should contain all possible shapes
-            Collections.addAll(shapes, Tetromino.Shape.values());
             // With a completely random sequence they appear in.
-            Collections.shuffle(shapes);
-            Collections.addAll(bag, shapes.toArray(Tetromino.Shape[]::new));
+            Collections.shuffle(allShapes);
+            Collections.addAll(bag, allShapes.toArray(Tetromino.Shape[]::new));
         }
 
-        // Replace the currentPiece with a new one
-        currentPiece = null;
-        currentPiece = new Tetromino(bag.get(0));
+        // Replace the currentPiece with a new shape from the bag
+        initializeWithPiece(bag.get(0));
         bag.remove(0);
+    }
+
+    public void switchWithHeldPiece() {
+        // Can only be used once per block.
+        // Unlocked when currentPiece is attached to the grid.
+        if (heldPieceLock) return;
+        heldPieceLock = true;
+
+        Tetromino.Shape currentPieceShape = currentPiece.getShape();
+        if (heldPiece == null) {
+            // At the start of the game heldPiece is null
+            // so, we can't really switch it with the currentPiece.
+            heldPiece = currentPieceShape;
+            generateNewPiece();
+            return;
+        }
+
+        initializeWithPiece(heldPiece);
+        heldPiece = currentPieceShape;
+    }
+    
+    /** Initialize the currentPiece with a new Shape */
+    private void initializeWithPiece(Tetromino.Shape shape) {
+        currentPiece = null;
+        currentPiece = new Tetromino(shape);
 
         int yPos = 1;
         int xPos = boardWidth / 2;
@@ -67,15 +93,6 @@ public class Board {
             currentPiece.setCurrentPosition(xPos, yPos);
 
         else gameState = GameState.Stopped;
-    }
-
-    public void holdCurrentPiece() {
-        if (heldPiece != null) return;
-        heldPiece = currentPiece.getShape();
-    }
-
-    public void releaseHeldPiece() {
-        if (heldPiece == null) return;
     }
 
     /** Remove Full rows */
@@ -104,16 +121,7 @@ public class Board {
         }
     }
 
-    /** Convert the current piece into a static block within the grid */
-    public void attachCurrentPieceToGrid() {
-        for (Point block : currentPiece.getBlockCoordinates())
-            grid[block.y][block.x] = currentPiece.getShape();
-
-        cleanupRows();
-        generateNewPiece();
-    }
-
-    /** Check whether the new coordinates overlap with other blocks */
+    /** Check whether the new coordinates overlap with other blocks or out of bounds */
     public boolean doesCollide(Point[] newCoordinates) {
         for (Point block : newCoordinates) {
 
@@ -129,13 +137,18 @@ public class Board {
     }
 
 
-    // Movement
-
+    // Movements
+    
     public void dropPiece() {
+        // The default value should be the currentPiece
+        dropPiece(currentPiece, true);
+    }
+
+    private void dropPiece(Tetromino target, boolean addScore) {
         // Keep Dropping the Piece
         // until it collides with something
         while (true)
-            if (movePiece(currentPiece, 0, 1, true)) break;
+            if (movePiece(target, 0, 1, addScore)) break;
     }
 
     /**
@@ -160,10 +173,17 @@ public class Board {
             );
         }
 
-        // If the provided tetromino is the current piece and not the
-        // Shadow tetromino attach it to the static block grid.
-        if (target.equals(currentPiece) && doesCollideWithGrid && deltaY > 0)
-            attachCurrentPieceToGrid();
+        // If the provided tetromino is the currentPiece and not the
+        // Shadow tetromino, attach it to the static block grid.
+        if (target.equals(currentPiece) && doesCollideWithGrid && deltaY > 0) {
+            // Convert the current piece blocks into a static block within the grid
+            for (Point block : target.getBlockCoordinates())
+                grid[block.y][block.x] = currentPiece.getShape();
+            
+            cleanupRows();
+            generateNewPiece();
+            heldPieceLock = false; // Unlock Held Piece Lock
+        }
 
         return doesCollideWithGrid;
     }
@@ -186,8 +206,12 @@ public class Board {
 
 
     // Getters
+    
+    public Tetromino.Shape getHeldPiece() {
+        return heldPiece;
+    }
 
-    public Tetromino.Shape getBlock(int x, int y) {
+    public Tetromino.Shape getBlockShapeAt(int x, int y) {
         return grid[y][x];
     }
 
@@ -206,10 +230,7 @@ public class Board {
     /** Shadow refers to the predicted landing place of the currentPiece */
     public Tetromino getCurrentPieceShadow() {
         Tetromino shadow = currentPiece.duplicate();
-        // Move it to the very bottom
-        while (true)
-            if (movePiece(shadow, 0, 1, false)) break;
-
+        dropPiece(shadow, false);
         return shadow;
     }
 
