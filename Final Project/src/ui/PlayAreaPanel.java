@@ -97,6 +97,7 @@ public class PlayAreaPanel extends JPanel {
         repaint();
     }
 
+    /** Clear timer (to avoid memory leaks) and call start again */
     public void restart() {
         timer.stop();
         timer = null;
@@ -161,7 +162,7 @@ public class PlayAreaPanel extends JPanel {
                     col == columns - 1) {
 
                     g.drawImage(
-                        ResourceManager.loadBlockTexture("Border"),
+                        ResourceManager.loadBlockTexture("Border", blockSize),
                         xPos, yPos, blockSize, blockSize, null
                     );
 
@@ -171,7 +172,7 @@ public class PlayAreaPanel extends JPanel {
                        board.getBlockTypeAt(col - 1, row - 1);
 
                    if (type != null) g.drawImage(
-                        ResourceManager.loadBlockTexture(type.name()),
+                        ResourceManager.loadBlockTexture(type.name(), blockSize),
                         xPos, yPos, blockSize, blockSize, null
                    );
                 }
@@ -218,13 +219,18 @@ public class PlayAreaPanel extends JPanel {
         g.dispose();
     }
 
+    /**
+     * Simple utils function used in paintComponent().
+     * Texture refers to the image filename (not including extension) of the texture
+     * within the texture pack folder.
+     * */
     private void drawTetromino(Graphics2D g, Tetromino tetromino, String texture) {
         for (Point block : tetromino.getBlockCoordinates()) {
             int xPos = (block.x + 1) * blockSize;
             int yPos = (block.y + 1) * blockSize;
 
             g.drawImage(
-                ResourceManager.loadBlockTexture(texture),
+                ResourceManager.loadBlockTexture(texture, blockSize),
                 xPos, yPos, blockSize, blockSize, null
             );
         }

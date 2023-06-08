@@ -27,8 +27,20 @@ public class ResourceManager {
      * Like loadImage but automatically prefixes the texture pack
      * directory and suffixes the image file extension (.png)
      * */
-    public static BufferedImage loadBlockTexture(String block) {
-        return loadImage(texturePack + "/" + block + ".png");
+    public static BufferedImage loadBlockTexture(String block, int blockSize) {
+        // Create a higher scale of the imported image
+        BufferedImage originalImage = loadImage(texturePack + "/" + block + ".png");
+        BufferedImage newImage = new BufferedImage(
+            blockSize, blockSize, BufferedImage.TYPE_4BYTE_ABGR
+        );
+
+        Graphics2D g2d = newImage.createGraphics();
+        // https://docs.oracle.com/javase/tutorial/2d/advanced/quality.html
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g2d.drawImage(originalImage, 0, 0, blockSize, blockSize, null);
+        g2d.dispose();
+
+        return newImage;
     }
 
     /**

@@ -11,13 +11,18 @@ public class GameWindow extends JFrame {
     public final PlayAreaPanel playAreaPanel;
     public final MenuPanel menuPanel;
 
-    public static final int BLOCKS_HEIGHT = 24;
-    public static final int BLOCKS_WIDTH = 16;
+    // Blocks refer to the blocks used in the UI, since Tetris is a "blocky" game.
+    // The values here refer to how many blocks there are in the window's X or Y axis.
+    public static final int BLOCKS_HEIGHT = 24; // Y axis
+    public static final int BLOCKS_WIDTH = 16; // X axis
+
     // Dictates the size of the UI while retaining UI component size ratios
     public double guiScale;
 
     public GameWindow() {
-        // Set GUI scaling based on your screen height
+        // Get your current screen height and use that to determine the
+        // correct GUI scaling for you.
+        // Note : Sometimes may calculate the wrong gui-scaling value for 4K+ screens.
         this((int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() / 24 / 20));
     }
 

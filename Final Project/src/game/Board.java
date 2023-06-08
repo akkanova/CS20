@@ -4,14 +4,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/** Board holding tetrominoes and main game logic */
+/** Board holding tetrominoes and core game logic */
 public class Board {
     private final ArrayList<Tetromino.Type> bag; // Contains the Next pieces
     private final Tetromino.Type[][] grid; // Static Blocks location (For collision and rendering)
 
-    private Tetromino.Type heldPiece;
+    private Tetromino.Type heldPiece; // You don't need to store its location, so storing the type is a simpler
     private Tetromino currentPiece;
-    private GameState gameState;
+    private GameState gameState; // Mainly to signify to the UI the user has lost, or paused the game
     private boolean heldPieceLock; // You can only switch with the held piece once per block.
     private int score;
 
@@ -42,6 +42,12 @@ public class Board {
             : GameState.Playing;
     }
 
+    /**
+     * Called when a new piece needs to be generated for the board.
+     * This function also makes sure that there is perfect randomness
+     * and diversity to future tetrominoes; so you don't get "I"
+     * pieces all the time or "Z"s.
+     * */
     public void generateNewPiece() {
         // Keep the bag full
         if (bag.size() < 5) {
@@ -59,6 +65,11 @@ public class Board {
         bag.remove(0);
     }
 
+    /**
+     *  Switch with the current held piece.
+     *  Or if there's no current held piece, just store the current piece
+     *  and do nothing, but replace the current piece with a new one.
+     * */
     public void switchWithHeldPiece() {
         // Can only be used once per block.
         // Unlocked when currentPiece is attached to the grid.
@@ -78,7 +89,10 @@ public class Board {
         heldPiece = currentPieceType;
     }
     
-    /** Initialize the currentPiece with a new Type */
+    /**
+     * Places a tetromino in the current starting
+     * position with the type provided
+     * */
     private void initializeWithType(Tetromino.Type type) {
         currentPiece = null;
         currentPiece = new Tetromino(type);
@@ -95,7 +109,7 @@ public class Board {
         else gameState = GameState.Stopped;
     }
 
-    /** Remove Full rows */
+    /** Remove any full rows within the grid and add that as a point for the user */
     public void cleanupRows() {
         ArrayList<Integer> rowsToClear = new ArrayList<>();
         for (int row = boardHeight - 1; row > 0; row--) {
@@ -121,7 +135,10 @@ public class Board {
         }
     }
 
-    /** Check whether the new coordinates overlap with other blocks or out of bounds */
+    /**
+     * Check whether the given coordinates overlap
+     * with other blocks in the grid or it is out of bounds
+     * */
     public boolean doesCollide(Point[] newCoordinates) {
         for (Point block : newCoordinates) {
 
@@ -137,13 +154,14 @@ public class Board {
     }
 
 
-    // Movements
-    
+    // Movements (Mainly called by UI)
+
     public void dropPiece() {
         // The default value should be the currentPiece
         dropPiece(currentPiece, true);
     }
 
+    /** Keep moving the target piece until it collides with something */
     private void dropPiece(Tetromino target, boolean addScore) {
         // Keep Dropping the Piece
         // until it collides with something
@@ -159,7 +177,12 @@ public class Board {
     public void movePieceRight() { movePiece(currentPiece, 1, 0, false); }
     public void movePieceLeft() { movePiece(currentPiece, -1, 0, false); }
 
-    /** Returns true if it collided with something */
+    /**
+     * Returns true if it collided with something.
+     * If it collides something while moving down, and the target tetromino
+     * is the current piece, convert the current into a static block within
+     * the grid, and generate a new piece.
+     * */
     private boolean movePiece(Tetromino target, int deltaX, int deltaY, boolean addScore) {
         Point[] newCoordinates = target.translate(deltaX, deltaY);
         boolean doesCollideWithGrid = doesCollide(newCoordinates);

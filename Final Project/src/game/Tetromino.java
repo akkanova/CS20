@@ -23,7 +23,7 @@ public class Tetromino {
 
 
     /**
-     * The Distinct shapes of Tetrominoes.
+     * The Distinct Types of Tetrominoes.
      * <a href="https://en.wikipedia.org/wiki/Tetromino#One-sided_tetrominoes">
      *     More Info
      * </a>
@@ -44,7 +44,7 @@ public class Tetromino {
         this.blocksOffsets = getBlockOffsets(type);
     }
 
-    /** get initial block offsets based on Tetromino shape */
+    /** get initial block offsets based on Tetromino type */
     public static Point[] getBlockOffsets(Type type) {
         return switch (type) {
             // I suggest visualizing the points in https://www.desmos.com/calculator, for it to make some sense
@@ -58,11 +58,12 @@ public class Tetromino {
         };
     }
 
+    /** Returns an empty 4 Points array (For each block of a tetromino) */
     public static Point[] getEmptyPointArray() {
         return new Point[] { new Point(), new Point(), new Point(), new Point() };
     }
 
-    /** Equally add the x & y value of a Point to an array of Points */
+    /** Equally add the x & y value of a Point to an array of Points, and return the sum */
     public static Point[] addOffsetsAndPosition(Point[] offsets, Point position) {
         Point[] coordinates = getEmptyPointArray();
 
@@ -118,6 +119,7 @@ public class Tetromino {
         copy.setBlocksOffsets(blocksOffsets);
         return copy;
     }
+
 
     // Setters
 
